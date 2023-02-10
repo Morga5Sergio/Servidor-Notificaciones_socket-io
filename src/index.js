@@ -20,33 +20,31 @@ var count = 0;
 const usuario = [];
 var usuarioMensajesEnEspera = [];   
 var jsLibraries = ['react', 'redux', 'vue', 'D3', 'Chart']
-// Cada vez que se ejecute un nuevo cliente  se va a ejecutar la función del socket  
+// Cada vez que se conecte un nuevo cliente  se va a ejecutar la funcion del socket   
 io.on("connection", socket => {
     // console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
-    // socket.broadcast.emit("registroBD", "Hola");     
-    io.emit("registroBD", "Hola"); 
+    io.emit("registroBD", "Send_register_base_datos"); 
 
     socket.on("disconnect", () => {
         // console.log("El cliente " + socket.id + " se ha desconectado ");
     });
     
-    // Registra los datos de los clientes en al 
-    socket.on('registroBase', messageB => {
+    // Registra los datos de los clientes conectados 
+    socket.on('registroBase', cedulaClient => {
         // usuario =  Almacena los datos que se conectan al servidor
         if(usuario.length == 0){
-            usuario.push({"id":messageB,"estado":"ninguno"});
+            usuario.push({"id":cedulaClient,"estado":"ninguno"});
         }
         // Encuentra si el usuario se encuentra almacenado fa
-        var index = usuario.map(element => element.id).indexOf(messageB);
+        var index = usuario.map(element => element.id).indexOf(cedulaClient);
         // console.log("Indice Encontrado " + " ==> " + index); 
 
         // El -1 indica que no se a encontra el usuario por tanto se debe registrar
         // Cuando se encuentra un indice mayor a cero significa que se a encontrado el elemento y este no debe registrarse
         if(index == -1){
-            usuario.push({"id":messageB,"estado":"ninguno"});
+            usuario.push({"id":cedulaClient,"estado":"ninguno"});
         }
         // console.log("Usuarios registrados", " ==> " + usuario.length );
-        // console.log("Usuarios registrados", " ==> " + usuario);
     });
     // Recibe el mensaje del servidor => Este corresponde a un array con los datos JSON 
     socket.on('emisionMensaje', msg => {
@@ -58,9 +56,10 @@ io.on("connection", socket => {
 
     io.emit("MensajesEspera", usuarioMensajesEnEspera); 
 
-    // Datos de objMensajeSocket => Estos datos son los siguientes 
+    // Datos de objMensajeSocket => Estos datos son los siguientes
+    // objMensajeSocket = {"id":"8321008", "estado":"ok"}  // Se verificara si existe o no existe   
     socket.on("verificar", objMensajeSocket => {
-        console.log("objMensajeSocket " , "     ===========================================================================    ");
+        console.log("objMensajeSocket " , "     ====================================    ==========================================    ");
         console.log("objMensajeSocket " , objMensajeSocket);    
         console.log("objMensajeSocket Usuario => " , usuario);    
 
@@ -85,35 +84,6 @@ io.on("connection", socket => {
         }
 
         console.log("ArrayDespues  ", " ==>  " + usuarioMensajesEnEspera );
-
-        // FIN 
-
-        // TODO Prueba_de_datos => prueba
-        /* 
-            usuario.forEach((element, index) => {
-            console.log("Datos=>  " , " ==> " , element , " index => " + index );
-                if(element.id == objMensajeSocket.id) {
-                
-                    console.log("ArrayDeDatos a verificar", " ==> " , usuarioMensajesEnEspera);
-                
-                    usuario[index].estado = "ok"; 
-                    console.log("arrayUsuario", " ==>  id " + usuario[index].id + " ==>  estado " + usuario[index].estado );
-                    console.log("arrEspera", " ==>  " + usuarioMensajesEnEspera.length);
-                    console.log("arrEspera", " ==>  %o", usuarioMensajesEnEspera);
-                        
-                    console.log("arrEsperaFinal", " Datpos del identificador ==>  ", objMensajeSocket.id);
-                    usuarioMensajesEnEspera = usuarioMensajesEnEspera.filter(element => element.id  !== objMensajeSocket.id);
-                
-                    console.log("arrEsperaFinal", " ==>  ", usuarioMensajesEnEspera);
-
-                
-                }else {
-
-                    console.log("========> AAA ", "  ===> " , usuarioMensajesEnEspera);
-                    usuarioMensajesEnEspera.push(element);
-                }
-            });
-        */    
     });
 });
 
