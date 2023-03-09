@@ -22,7 +22,7 @@ var usuarioMensajesEnEspera = [];
 var jsLibraries = ['react', 'redux', 'vue', 'D3', 'Chart']
 // Cada vez que se conecte un nuevo cliente  se va a ejecutar la funcion del socket   
 io.on("connection", socket => {
-    // console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
+     console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
     io.emit("registroBD", "Send_register_base_datos"); 
 
     socket.on("disconnect", () => {
@@ -31,6 +31,7 @@ io.on("connection", socket => {
     
     // Registra los datos de los clientes conectados 
     socket.on('registroBase', cedulaClient => {
+        console.log("Datos ", " Datos de prueba ddddd " + cedulaClient);
         // usuario =  Almacena los datos que se conectan al servidor
         if(usuario.length == 0){
             usuario.push({"id":cedulaClient,"estado":"ninguno"});
