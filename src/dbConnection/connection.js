@@ -14,4 +14,4 @@ const uri = `mongodb://dsin:${password}@dcbdmongo.impuestos.gob.bo:27017/?authMe
 // module.exports = connection
 */
 
-module.exports = ()=>  mongoose.connect(uri, {userNewUrlParser:true, useUnifiedTopology:true});
+module.exports = ()=>  mongoose.connect(uri, {  maxPoolSize: 50, wtimeoutMS: 2500});

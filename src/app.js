@@ -9,9 +9,10 @@ const express = require('express');
 // Ahora se puede utlizar app como si fuera el http
 const app = express()
 
-app.get('/', (req, res)=>{
-    res.send("La conexion ha sido correcta prueba dsf");
-})
+// ROUTES
+/*const routes = require('./routes/index.routes')
+app.use(routes)*/
+app.use(require('./routes/index.routes'))
 
 app.listen(3000, ()=> {
     console.log('Servidor a la espera de conexion')
