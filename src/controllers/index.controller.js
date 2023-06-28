@@ -4,11 +4,11 @@ const NotificacionesPushModel = require('../models/notificacion_push')
 
 controller.index =  async (req, res)=>{
     try{
-        res.send("La conexion ha sido correcta sdf sda")
+        res.send("La conexion ha sido correcta")
         console.log("Connection OK como DEV");
         await connection();
         console.log("Conexionde base de Datos");
-        
+
         const allNotificacionesPush = await NotificacionesPushModel.find();
 
         console.log(allNotificacionesPush);

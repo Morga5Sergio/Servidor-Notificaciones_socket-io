@@ -19,7 +19,11 @@ var count = 0;
 // const usuario = new Array(String);
 const usuario = [];
 var usuarioMensajesEnEspera = [];   
-var jsLibraries = ['react', 'redux', 'vue', 'D3', 'Chart']
+
+// Conexion a la base de datos
+
+
+
 // Cada vez que se conecte un nuevo cliente  se va a ejecutar la funcion del socket   
 io.on("connection", socket => {
      console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
@@ -60,7 +64,7 @@ io.on("connection", socket => {
     // Datos de objMensajeSocket => Estos datos son los siguientes
     // objMensajeSocket = {"id":"8321008", "estado":"ok"}  // Se verificara si existe o no existe   
     socket.on("verificar", objMensajeSocket => {
-        console.log("objMensajeSocket " , "     ====================================    ==========================================    ");
+        console.log("objMensajeSocket " , "     ============================================================================== ");
         console.log("objMensajeSocket " , objMensajeSocket);    
         console.log("objMensajeSocket Usuario => " , usuario);    
 
