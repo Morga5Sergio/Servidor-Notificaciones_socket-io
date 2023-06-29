@@ -7,13 +7,12 @@ const controller = require('../controllers/index.controller')
 //router.use("/pagina",express.static(__dirname + "/public"))
 
 // router.use(express.static(__dirname + "/public"));
-
+router.use(express.static(__dirname + "/public"));
 router.get('/', controller.index)
 // Mi respuesta desde servicios externos.
 router.get('/servicios', (req, res) => {
     res.send('Mi respuesta desde Express');
 })
-
 
 
 /*router.get('/', (req, res)=>{

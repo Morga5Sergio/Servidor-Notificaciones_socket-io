@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const { Console } = require("console");
 
 const app = express();
-const httpServer = createServer(app);
+const httpServer = createServer(app); // Le http es el que inicia el servidor 
 const io = new Server(httpServer);
 
 // Añadiendo archivos estaticos , path es un modulo de nodeJs que se puede usar para unir rutas  
@@ -21,9 +21,14 @@ const usuario = [];
 var usuarioMensajesEnEspera = [];   
 
 // Conexion a la base de datos
+const controller = {}
+const connection = require('./dbConnection/connection')
+const NotificacionesPushModel = require('./models/notificacion_push')
+connection();
+const allNotificacionesPush =  NotificacionesPushModel.find();
+console.log(allNotificacionesPush);
 
-
-
+module.exports = controller
 // Cada vez que se conecte un nuevo cliente  se va a ejecutar la funcion del socket   
 io.on("connection", socket => {
      console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);

@@ -4,9 +4,33 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagina de inicio</title>
+    <title>¡Servidor con Express y socket.io!</title>
 </head>
 <body>
-    <h1> Pagina de Inicio</h1>
+    <h1 style="background-color: yellow; text-align: center;"> Ejemplo de notificacion </h1>
+    <section style="width: 100%; text-align: center;">
+        <button id="emit-to-server"> notificación sdfsd </button>
+    </section>
+
+    <section style="width: 100%; text-align: center;">
+        <button id="disconnect"> Desconectar </button>
+    </section>
+
+    <section style="width: 100%; text-align: center;">
+        <button id="reconectar"> Reconectar </button>
+    </section>
+
+
+    <!-- TODO Prueba de contorl fas  -->  
+    <section style="width: 100%; text-align: center;">
+        <button id="reconectar"> Reconectar </button>
+    </section>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- En esa direccion del script se encuentra importado el sockect.io-->
+    <script src="/js/index.js"></script> 
+    <!-- <script>
+        const socket = io();
+     </script>-->
 </body>
 </html>

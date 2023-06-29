@@ -18,7 +18,15 @@ controller.index =  async (req, res)=>{
 
 }
 
-module.exports = controller
+// TODO Prueba 
+
+async function obtenerDatos(){
+    const allNotificacionesPush = await NotificacionesPushModel.find();
+    console.log(allNotificacionesPush);
+}
+
+module.exports = controller;
+module.exports = obtenerDatos;
 
 //Ejemplo Sencillo
 /*controller.name = 'Gary'
