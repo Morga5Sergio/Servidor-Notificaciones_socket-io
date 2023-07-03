@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¡Servidor con Express y socket.io!</title>
 </head>
+
 <body>
     <h1 style="background-color: yellow; text-align: center;"> Ejemplo de notificacion </h1>
     <section style="width: 100%; text-align: center;">
-        <button id="emit-to-server"> notificación sdfsd </button>
+        <button id="emit-to-server"> notificación Datos MongoDb </button>
     </section>
 
     <section style="width: 100%; text-align: center;">
@@ -21,16 +23,21 @@
     </section>
 
 
-    <!-- TODO Prueba de contorl fas  -->  
+    <!-- TODO Prueba de contorl fas  -->
     <section style="width: 100%; text-align: center;">
         <button id="reconectar"> Reconectar </button>
     </section>
-    
+
     <script src="/socket.io/socket.io.js"></script>
     <!-- En esa direccion del script se encuentra importado el sockect.io-->
-    <script src="/js/index.js"></script> 
+    
+    <script src="/js/index.js" type="module"></script>
+    <div id="app"></div>
     <!-- <script>
         const socket = io();
      </script>-->
+
+
 </body>
+
 </html>

@@ -3,7 +3,7 @@ const connection = require('../dbConnection/connection')
 const NotificacionesPushModel = require('../models/notificacion_push')
 const SadNotNotificacionesModel = require('../models/sad_not_notificaciones')
 
-
+//static const arreglo12 = [];
 controller.index =  async (req, res)=>{
     try{
         res.send("La conexion ha sido correcta")
@@ -40,8 +40,12 @@ async function obtenerDatos(){
 
 async function obtenerDatosNotificacion(){
     const sanNotNotificacionesPushFinal = await SadNotNotificacionesModel.find();
-    console.log("------------------------------ Obtencion de las notificaciones ");
+    //const sanNotNotificacionesPushFinal = await SadNotNotificacionesModel.findOne({'_id':ObjectId('6492123d89bb6a7df6f50d85')});
+   // arreglo12 = sanNotNotificacionesPushFinal;
+    console.log("------------------------------ Obtencion de las notificaciones  -------------------- ");
     console.log(sanNotNotificacionesPushFinal);
+    return sanNotNotificacionesPushFinal;
+    
 }
 module.exports = controller;
 module.exports = obtenerDatos;

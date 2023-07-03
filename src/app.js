@@ -15,7 +15,7 @@ app.get("/", (req, res)=> {
 
 const _connect = require('./dbConnection/connection');                      // Llama al archivo para la conexion de la base de datos en MONGO 
 const obtenerDatos = require('./controllers/index.controller')              // Llama al archivo para el  proceso de la obtención de los datos en MONGO
-const obtenerDatosNotificacion = require('./controllers/index.controller')
+const obtenerDatosNotificacion = require('./controllers/index.controller');
 
 const usuario = [];
 var usuarioMensajesEnEspera = [];                       // Se va almacenar en el array y se va  preguntar si se envio o no se envio (Por el momento esto es opcional)
@@ -28,9 +28,12 @@ app.use(routes)*/
 
 console.log(" direccion de la pagina " +  __dirname+"/public");
 
+
+// ------------------------------------------------------------
+
 _connect();                     // Realiza la conexion de la base de datos en MONGO.
-obtenerDatos();                 // Obtiene los datos de la coleccion => sad_not_notificaciones_push_prueba
-obtenerDatosNotificacion();     // Obtiene los datos de la coleccion => sad_not_notificaciones 
+//obtenerDatos();                 // Obtiene los datos de la coleccion => sad_not_notificaciones_push_prueba
+//obtenerDatosNotificacion();     // Obtiene los datos de la coleccion => sad_not_notificaciones 
 
 app.use((req,res,next) => {
     res.status(404).sendFile(__dirname + "/public/404.html");    // Redireccion De una pagian en HTML que indica, que no debe f
