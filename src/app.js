@@ -28,9 +28,40 @@ app.use(routes)*/
 
 console.log(" direccion de la pagina " +  __dirname+"/public");
 
+// ------------------------------- Pruebas ------------------------------------------------------------
 
-// ------------------------------------------------------------
+const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
+var XMLHttpRequest = require("xhr2");
+const xhr = new XMLHttpRequest();
 
+function onRequestHandler(){
+    if(this.readyState == 4 && this.status == 200){
+        // 0 = UNSET, no se ha llamado al metodo open
+        // 1 = OPENED, se ha llamado al meotodo open
+        // 2 = HEADERS_RECEIVED, se esta llamando al metodo send()
+        // 3 = LOADING, se esta cargando, es decir, esta recibiendo la respuesta 
+        // 4 = DONE, se ha completado la operación.
+        console.log(this.response)
+        const data = JSON.parse(this.response); 
+        console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+        /*const HTMLResponse = document.querySelector('#app');
+        const tpl = data.map((user) => `<li>${user.name} ${user.email}</li>`);
+        HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;*/
+    } 
+}
+
+xhr.addEventListener('load', onRequestHandler);
+    xhr.open('GET', `${API_URL}`);
+    xhr.send();
+
+/*function respuestaServicio(){
+    xhr.addEventListener('load', onRequestHandler);
+    xhr.open('GET', `${API_URL}`);
+    xhr.send();
+}*/
+
+
+// ------------------------------- Pruebas 2 ----------------------------------
 _connect();                     // Realiza la conexion de la base de datos en MONGO.
 //obtenerDatos();                 // Obtiene los datos de la coleccion => sad_not_notificaciones_push_prueba
 //obtenerDatosNotificacion();     // Obtiene los datos de la coleccion => sad_not_notificaciones 
