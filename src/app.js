@@ -12,10 +12,11 @@ app.use(express.static(path.join(__dirname, "views"))); // Añadiendo archivos e
 app.get("/", (req, res)=> {
         res.sendFile(__dirname + "/views/index.html");
 });
+let data= [];
 
 const _connect = require('./dbConnection/connection');                      // Llama al archivo para la conexion de la base de datos en MONGO 
-const obtenerDatos = require('./controllers/index.controller')              // Llama al archivo para el  proceso de la obtención de los datos en MONGO
-const obtenerDatosNotificacion = require('./controllers/index.controller');
+// const obtenerDatos = require('./controllers/index.controller')              // Llama al archivo para el  proceso de la obtención de los datos en MONGO
+// const obtenerDatosNotificacion = require('./controllers/index.controller');
 
 const usuario = [];
 var usuarioMensajesEnEspera = [];                       // Se va almacenar en el array y se va  preguntar si se envio o no se envio (Por el momento esto es opcional)
@@ -41,8 +42,8 @@ function onRequestHandler(){
         // 2 = HEADERS_RECEIVED, se esta llamando al metodo send()
         // 3 = LOADING, se esta cargando, es decir, esta recibiendo la respuesta 
         // 4 = DONE, se ha completado la operación.
-        console.log(this.response)
-        const data = JSON.parse(this.response); 
+         // console.log(this.response)
+         data = JSON.parse(this.response); 
         console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
         /*const HTMLResponse = document.querySelector('#app');
         const tpl = data.map((user) => `<li>${user.name} ${user.email}</li>`);
@@ -50,7 +51,7 @@ function onRequestHandler(){
     } 
 }
 
-xhr.addEventListener('load', onRequestHandler);
+    xhr.addEventListener('load', onRequestHandler);
     xhr.open('GET', `${API_URL}`);
     xhr.send();
 
@@ -71,7 +72,7 @@ app.use((req,res,next) => {
 })
 
 io.on("connection", socket => {
-    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
+   console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
    io.emit("registroBD", "Send_register_base_datos"); 
 
    socket.on("disconnect", () => {
@@ -97,9 +98,10 @@ io.on("connection", socket => {
        // console.log("Usuarios registrados", " ==> " + usuario.length );
    });
    // Recibe el mensaje del servidor => Este corresponde a un array con los datos JSON 
-   socket.on('emisionMensaje', msg => {
-       
-       io.emit('msgServer', msg);            
+   socket.on('emisionMensaje', msg => {       
+        console.log("_____________________________________________________________________");
+        console.log("Mensaje_Notificación", " ====> " , data );
+       io.emit('msgServer', data);            
    });
 
    // Esta emisión en notifica los mensajes en espera

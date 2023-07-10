@@ -23,24 +23,4 @@ const uri = `mongodb://dsin:${process.env.MONGO_PASSWORD}@dcbdmongo.impuestos.go
                 }
             )
     }
-    module.exports = _connect;
-
-
-
-    // OTHER 
-
-    /*module.exports = ()=>  mongoose.connect(uri, 
-    {maxPoolSize: 50, 
-     wtimeoutMS: 2500,
-     authSource:"dsin",
-     user:"dsin",
-     pass:"dsin",
-     useNewUrlParser:true
-    }).then(
-        ()=>{
-           console.log("La conexion de la base de datos se conecto correctamente")     
-        },
-        (err) => {
-            console.log("connection error", err);
-        }
-    )*/
+module.exports = _connect;

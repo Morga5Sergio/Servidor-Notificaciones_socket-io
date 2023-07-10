@@ -29,7 +29,7 @@ fetch(`${API_URL}/users`)
 
 /*Primera forma de consumir servicios*/
 
-const xhr = new XMLHttpRequest();
+/*const xhr = new XMLHttpRequest();
 function onRequestHandler(){
     if(this.readyState == 4 && this.status == 200){
         // 0 = UNSET, no se ha llamado al metodo open
@@ -47,7 +47,7 @@ function onRequestHandler(){
 }
 xhr.addEventListener('load', onRequestHandler);
 xhr.open('GET', `${API_URL}`);
-xhr.send();
+xhr.send();*/
 
 
 // Envia Notificación fasd
@@ -68,7 +68,7 @@ emitReconectar.addEventListener("click", ()=> {
 // TODO Escuchar el evento de la conección
 socket.on('msgServer', msg => {
     console.log("cnr Mensajes " , " ==>  ", msg );
-    var arrMensajSocketResponse = new Array(msg[0].id, msg[0].mensaje);
+    // var arrMensajSocketResponse = new Array(msg[0].id, msg[0].mensaje);
     var socketMensaje = {"id":"8321008", "estado":"ok"} 
     console.log("Datos recibidos", " ===> ", socketMensaje ) 
 
