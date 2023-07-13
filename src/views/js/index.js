@@ -51,7 +51,7 @@ xhr.send();*/
 
 
 // Envia Notificación fasd
-emitToServer.addEventListener("click", ()=> {
+emitToServer.addEventListener("cliregistroBasek", ()=> {
     // socket.emit("counter", "8321008") // JSON CI, Nombre
     socket.emit("emisionMensaje",[{"id":"8321008", "mensaje":"Dato1", "estado":"ninguno"},{"id":"55", "mensaje":"Dato2", "estado":"ninguno"}]
     ) // JSON CI, Nombre
@@ -80,8 +80,13 @@ socket.on('msgServer', msg => {
 
 socket.on("registroBD", message => {
     // console.log("Entra_a_registrarBS", " ==> ", message);
+
+    var usuario_p
     socket.emit("registroBase", "8321008");  // Dato quemado - Manda al servidor del registro de datos. 
 });
+
+
+
 
 //
 

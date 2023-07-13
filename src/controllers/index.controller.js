@@ -2,6 +2,7 @@ const controller = {}
 const connection = require('../dbConnection/connection')
 const NotificacionesPushModel = require('../models/notificacion_push')
 const SadNotNotificacionesModel = require('../models/sad_not_notificaciones')
+const UsuarioModel = require('../models/usuario_push')
 
 //static const arreglo12 = [];
 controller.index =  async (req, res)=>{
@@ -74,11 +75,24 @@ function respuestaServicio(){
     xhr.send();
 }
 
+const list= [];
+
+async function guardarDatos(req, res){
+
+    
+    
+    const guardarUsuarioPush = await UsuarioPushModel.find();
+    console.log(guardarUsuarioPush);
+}
+
+
+
 // Fin de servcios servicios externos. 
 
 module.exports = controller;
 module.exports = obtenerDatos;
 module.exports = obtenerDatosNotificacion;
+module.exports = guardarDatos;
 
 
 //Ejemplo Sencillo

@@ -33,6 +33,7 @@ console.log(" direccion de la pagina " +  __dirname+"/public");
 
 const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
 var XMLHttpRequest = require("xhr2");
+const UsuarioPushModel = require('./models/usuario_push');
 const xhr = new XMLHttpRequest();
 
 function onRequestHandler(){
@@ -80,9 +81,24 @@ io.on("connection", socket => {
    });
    
    // Registra los datos de los clientes conectados 
+   // viqui
+
+/*
+function addMessage(message) {
+    const myMessage= new Model(message);
+    myMessage.save();
+}
+*/
+
    socket.on('registroBase', cedulaClient => {
        console.log("Datos ", " Datos de prueba ddddd " + cedulaClient);
        // usuario =  Almacena los datos que se conectan al servidor
+       const nuevoUsuario = { nombre: 'John Doe', edad: 30, email: 'johndoe@example.com' };
+
+       const myRegistro= new UsuarioPushModel({_id: '456123',usuario_registro_id:4567898,usuario_id:'789456',numero_documento:'9199772',codigo_complemento:'cp',tipo_documento_identidad_id:'337',nombre_dispositivo:'Samsung',imei:1234564,fecha_registro:'16/06/2023',fecha_ultima_modificacion:'17/07/2023',estado_id:'act'});
+
+        myRegistro.save();
+
        if(usuario.length == 0){
            usuario.push({"id":cedulaClient,"estado":"ninguno"});
        }
