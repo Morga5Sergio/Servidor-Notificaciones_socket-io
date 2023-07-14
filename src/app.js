@@ -6,7 +6,7 @@ const { Console } = require("console");       // Importacion para mostrar mensaj
 const app = express();                        // Se tiene guardado express con su propiedades y sus metodos
 const httpServer = createServer(app);         // Le http es el que inicia el servidor, Now can use the app as if you were http.
 require('dotenv').config();                   // Para las variables de entorno, con las pruebas de seguridad. 
-const io = new Server(httpServer);            // Constante io para el servidor Socket.io
+const io = new Server(httpServer, {cors: { origin: '*'} });            // Constante io para el servidor Socket.io
 
 app.use(express.static(path.join(__dirname, "views"))); // Añadiendo archivos estaticos , path es un modulo de nodeJs que se puede usar para unir rutas  
 app.get("/", (req, res)=> {
