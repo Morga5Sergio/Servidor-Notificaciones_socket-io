@@ -19,6 +19,8 @@ const _connect = require('./dbConnection/connection');                      // L
 // const obtenerDatosNotificacion = require('./controllers/index.controller');
 
 const usuario = [];
+
+let usuarioPrueba = {"usuario_registro":"","usuarioId":"","numeroDocumento":"","tipoDocumentoId":"","nombreDispositivo":"","imei":"","fechaRegisto":"","fechaModificacion":"","estadoId":""};
 var usuarioMensajesEnEspera = [];                       // Se va almacenar en el array y se va  preguntar si se envio o no se envio (Por el momento esto es opcional)
 
 /*const routes = require('./routes/index.routes')       // Rutas que se le puede adicionar a la APP otra direcciones -- OPCIONAL si lo requiere el servidor
@@ -91,13 +93,18 @@ function addMessage(message) {
 */
 
    socket.on('registroBase', cedulaClient => {
+
+        usuarioPrueba =cedulaClient;
+        console.log("Datos ", " Datos de prueba --*---" + usuarioPrueba);
        console.log("Datos ", " Datos de prueba ddddd " + cedulaClient);
+       console.log("Datos ", " Datos de prueba ddddd " + cedulaClient.numeroDocumento);
        // usuario =  Almacena los datos que se conectan al servidor
        const nuevoUsuario = { nombre: 'John Doe', edad: 30, email: 'johndoe@example.com' };
+       
+       
+       //const myRegistro= new UsuarioPushModel({usuario_registro_id:"",usuario_id:'789456',numero_documento:'9199772',codigo_complemento:'cp',tipo_documento_identidad_id:'337',nombre_dispositivo:'Samsung',imei:1234564,fecha_registro:'16/06/2023',fecha_ultima_modificacion:'17/07/2023',estado_id:'act'});
 
-       const myRegistro= new UsuarioPushModel({_id: '456123',usuario_registro_id:4567898,usuario_id:'789456',numero_documento:'9199772',codigo_complemento:'cp',tipo_documento_identidad_id:'337',nombre_dispositivo:'Samsung',imei:1234564,fecha_registro:'16/06/2023',fecha_ultima_modificacion:'17/07/2023',estado_id:'act'});
-
-        myRegistro.save();
+        //myRegistro.save();
 
        if(usuario.length == 0){
            usuario.push({"id":cedulaClient,"estado":"ninguno"});
