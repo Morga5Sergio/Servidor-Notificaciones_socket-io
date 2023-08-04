@@ -3,7 +3,63 @@ const path = require("path");                 // path
 const { createServer } = require("http");     // Creacion de servidor
 const { Server } = require("socket.io");      // Importacion de socket.io
 const { Console } = require("console");       // Importacion para mostrar mensajes en consola 
+const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
+                                                // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
+
 const app = express();                        // Se tiene guardado express con su propiedades y sus metodos
+// TODO Importaciones de WEB Push 
+const webpush = require('web-push');
+//const cors = require('cors');
+const bodyParser = require('body-parser') 
+
+const vapidKeys = {
+    "publicKey":"BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg",
+    "privateKey":"0giCCcZw9RhRoqoeO1Ejy2SsIFb6n4460Shf4oWk2Bc"
+}
+
+webpush.setVapidDetails(
+    'mailto:example@yourdomain.org',
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+);
+
+
+const enviarNotificacion = (req, res) => {
+    const pushSubscription = {
+        // 
+        endpoint: 'https://fcm.googleapis.com/fcm/send/cc-PKKHjqw0:APA91bFCFRo0KVfkt7PV_TNwrMKfObUxbj79_vVdndbuIQVthaFjhOLI118fbJ_TBCyhQXq3Y3lUljaufmCHptkE9s6aeHIeNMZVTlJ3yvNYSuAcZzvgAof5ZvDudshMBgfMFc3ZVPCZ', "expirationTime": null, 
+        keys: {
+            auth: 'td0r6EN5b81DoOGBEGpZdA', 
+            p256dh: 'BB_kheAotWyAFY54Yof0q4QcElYG5vRBU5_blczjWbETGA1-wddiU4aF8YDa_TVGSaOrSjeXMonv7KKc4IcWmOo'
+        }
+    };
+
+    const payload = {
+        "notification": {
+            "title": "😄😄 Saludos",
+            "body": "Subscribete a mi canal de YOUTUBE",
+            "vibrate": [100, 50, 100],
+            "image": "https://avatars2.githubusercontent.com/u/15802366?s=460&u=ac6cc646599f2ed6c4699a74b15192a29177f85a&v=4",
+            "actions": [{
+                "action": "explore",
+                "title": "Go to the site"
+            }]
+        }
+    }
+
+    webpush.sendNotification(
+        pushSubscription,
+        JSON.stringify(payload))
+        .then(res => {
+            console.log('Enviado !!');
+        }).catch(err => {
+            console.log('Error', err);
+        })
+   //  res.send({ data: 'Se envio subscribete!!' })
+}
+
+app.route('/api/enviar').post(enviarNotificacion);
+
 const httpServer = createServer(app);         // Le http es el que inicia el servidor, Now can use the app as if you were http.
 require('dotenv').config();                   // Para las variables de entorno, con las pruebas de seguridad. 
 const io = new Server(httpServer, {cors: { origin: '*'} });            // Constante io para el servidor Socket.io
@@ -13,6 +69,8 @@ app.get("/", (req, res)=> {
         res.sendFile(__dirname + "/views/index.html");
 });
 let data= [];
+
+
 
 const _connect = require('./dbConnection/connection');                      // Llama al archivo para la conexion de la base de datos en MONGO 
 // const obtenerDatos = require('./controllers/index.controller')              // Llama al archivo para el  proceso de la obtención de los datos en MONGO
@@ -40,29 +98,18 @@ const xhr = new XMLHttpRequest();
 
 function onRequestHandler(){
     if(this.readyState == 4 && this.status == 200){
-        // 0 = UNSET, no se ha llamado al metodo open
-        // 1 = OPENED, se ha llamado al meotodo open
-        // 2 = HEADERS_RECEIVED, se esta llamando al metodo send()
-        // 3 = LOADING, se esta cargando, es decir, esta recibiendo la respuesta 
-        // 4 = DONE, se ha completado la operación.
-         // console.log(this.response)
-         data = JSON.parse(this.response); 
-        console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-        /*const HTMLResponse = document.querySelector('#app');
-        const tpl = data.map((user) => `<li>${user.name} ${user.email}</li>`);
-        HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;*/
+        data = JSON.parse(this.response); 
+        //console.log("----------  Respuesta del servicio externo --------------");
+        //console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
     } 
 }
 
+function respuestaServicio(){
     xhr.addEventListener('load', onRequestHandler);
     xhr.open('GET', `${API_URL}`);
     xhr.send();
+}
 
-/*function respuestaServicio(){
-    xhr.addEventListener('load', onRequestHandler);
-    xhr.open('GET', `${API_URL}`);
-    xhr.send();
-}*/
 
 
 // ------------------------------- Pruebas 2 ----------------------------------
@@ -81,54 +128,17 @@ io.on("connection", socket => {
    socket.on("disconnect", () => {
        // console.log("El cliente " + socket.id + " se ha desconectado ");
    });
-   
-   // Registra los datos de los clientes conectados 
-   // viqui
 
-/*
-function addMessage(message) {
-    const myMessage= new Model(message);
-    myMessage.save();
-}
-*/
-
-   socket.on('registroBase', cedulaClient => {
-
-        usuarioPrueba =cedulaClient;
-        console.log("Datos ", " Datos de prueba --*---" + usuarioPrueba);
-       console.log("Datos ", " Datos de prueba ddddd " + cedulaClient);
-       console.log("Datos ", " Datos de prueba ddddd " + cedulaClient.numeroDocumento);
-       // usuario =  Almacena los datos que se conectan al servidor
-       const nuevoUsuario = { nombre: 'John Doe', edad: 30, email: 'johndoe@example.com' };
-       
-       
-       //const myRegistro= new UsuarioPushModel({usuario_registro_id:"",usuario_id:'789456',numero_documento:'9199772',codigo_complemento:'cp',tipo_documento_identidad_id:'337',nombre_dispositivo:'Samsung',imei:1234564,fecha_registro:'16/06/2023',fecha_ultima_modificacion:'17/07/2023',estado_id:'act'});
-
-        //myRegistro.save();
-
-       if(usuario.length == 0){
-           usuario.push({"id":cedulaClient,"estado":"ninguno"});
-       }
-       // Encuentra si el usuario se encuentra almacenado fa
-       var index = usuario.map(element => element.id).indexOf(cedulaClient);
-       // console.log("Indice Encontrado " + " ==> " + index); 
-
-       // El -1 indica que no se a encontra el usuario por tanto se debe registrar
-       // Cuando se encuentra un indice mayor a cero significa que se a encontrado el elemento y este no debe registrarse
-       if(index == -1){
-           usuario.push({"id":cedulaClient,"estado":"ninguno"});
-       }
-       // console.log("Usuarios registrados", " ==> " + usuario.length );
-   });
-   // Recibe el mensaje del servidor => Este corresponde a un array con los datos JSON 
+   // Envia el Mensaje del Servidor Hacia el cliente Predeterminado
    socket.on('emisionMensaje', msg => {       
-        console.log("_____________________________________________________________________");
-        console.log("Mensaje_Notificación", " ====> " , data );
+       console.log("_____________________________________________________________________");
+       console.log("Mensaje_Notificación", " ====> " , data );
+       //respuestaServicio();
+       enviarNotificacion();
        io.emit('msgServer', data);            
    });
 
-   // Esta emisión en notifica los mensajes en espera
-
+   // Esta Sección solo se encarga de reenviar los mensajes
    io.emit("MensajesEspera", usuarioMensajesEnEspera); 
 
    // Datos de objMensajeSocket => Estos datos son los siguientes
@@ -161,8 +171,6 @@ function addMessage(message) {
        console.log("ArrayDespues  ", " ==>  " + usuarioMensajesEnEspera );
    });
 });
-
-
 
 httpServer.listen(process.env.PORT , ()=> {
     console.log('Servidor a la espera de conexion ', process.env.PORT);

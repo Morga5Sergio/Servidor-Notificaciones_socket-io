@@ -51,7 +51,8 @@ xhr.send();*/
 
 
 // Envia Notificación fasd
-emitToServer.addEventListener("cliregistroBasek", ()=> {
+emitToServer.addEventListener("click", ()=> {
+    console.log("Emision mensaje Prueba de control");
     // socket.emit("counter", "8321008") // JSON CI, Nombre
     socket.emit("emisionMensaje",[{"id":"8321008", "mensaje":"Dato1", "estado":"ninguno"},{"id":"55", "mensaje":"Dato2", "estado":"ninguno"}]
     ) // JSON CI, Nombre
