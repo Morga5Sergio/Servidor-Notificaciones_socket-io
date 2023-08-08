@@ -5,7 +5,10 @@ const { Server } = require("socket.io");      // Importacion de socket.io
 const { Console } = require("console");       // Importacion para mostrar mensajes en consola 
 const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
                                                 // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
-
+/*const kafka = require('kafka-node');
+const Consumer = kafka.Consumer;
+const client = new kafka.KafkaClient({ kafkaHost: 'localhost:9092' });
+const topic = 'test';*/
 const app = express();                        // Se tiene guardado express con su propiedades y sus metodos
 // TODO Importaciones de WEB Push 
 const webpush = require('web-push');
@@ -23,29 +26,59 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 );
 
+//const variableId = "1461";
 
+// TODO ENVIO DE NOTIFICACIONES 
 const enviarNotificacion = (req, res) => {
     const pushSubscription = {
-        // 
-        endpoint: 'https://fcm.googleapis.com/fcm/send/cc-PKKHjqw0:APA91bFCFRo0KVfkt7PV_TNwrMKfObUxbj79_vVdndbuIQVthaFjhOLI118fbJ_TBCyhQXq3Y3lUljaufmCHptkE9s6aeHIeNMZVTlJ3yvNYSuAcZzvgAof5ZvDudshMBgfMFc3ZVPCZ', "expirationTime": null, 
+        // https://fcm.googleapis.com/fcm/send/fq6ObFmYAcU:APA91bHNzU5kyaemiw1OJQVvCAkjIYWbz6X7h9PLwyTJmKJW0eAlutAUM-6wpr3c6-sCIxTaXJhdzfAk-It6QmnSxlqvaVSm9LByXtaTEew4KdDDsGCcd5xXVCJQ-mZv0EfvY0qmGYU9
+        // https://fcm.googleapis.com/fcm/send/eG7HlG_xRqc:APA91bEaxnvLp-dE4VqyRd4bisXqXEc-gaLZN4S5J76mLohXepZdrqDmokLreoiuJ3bMRqRhKyO3PKuQp6qVMjTej7e7xJeObvVZQhitY1E8XXvEm48nDxk0nbaJwz-OiPEzjJAhrnj4
+        endpoint: 'https://fcm.googleapis.com/fcm/send/eG7HlG_xRqc:APA91bEaxnvLp-dE4VqyRd4bisXqXEc-gaLZN4S5J76mLohXepZdrqDmokLreoiuJ3bMRqRhKyO3PKuQp6qVMjTej7e7xJeObvVZQhitY1E8XXvEm48nDxk0nbaJwz-OiPEzjJAhrnj4', "expirationTime": null, 
         keys: {
-            auth: 'td0r6EN5b81DoOGBEGpZdA', 
-            p256dh: 'BB_kheAotWyAFY54Yof0q4QcElYG5vRBU5_blczjWbETGA1-wddiU4aF8YDa_TVGSaOrSjeXMonv7KKc4IcWmOo'
+            auth: 'XH5XMcmWAi_VxzCvUOPiuA', 
+            p256dh: 'BMj5IWg3c2w_bMe1pFUOBrgytjGXTt17p6ehiJWZm1L-6lr20mbZ2AP4qnbHcjUnThUSUHSrH2ig-rxQny02WPk'
         }
     };
 
     const payload = {
         "notification": {
-            "title": "😄😄 Saludos",
-            "body": "Subscribete a mi canal de YOUTUBE",
+            "title": "Notificacion Administrativa",
+            "body": "AUTO DE MULTA",
             "vibrate": [100, 50, 100],
-            "image": "https://avatars2.githubusercontent.com/u/15802366?s=460&u=ac6cc646599f2ed6c4699a74b15192a29177f85a&v=4",
-            "actions": [{
-                "action": "explore",
-                "title": "Go to the site"
-            }]
+            "actions": [
+                {
+                    "action": "reply",
+                    "title": "Responder",
+                    "type": "text"
+                }
+            ],
+            "data": {
+                "onActionClick": {
+                    "default": {
+                        "operation": "navigateLastFocusedOrOpen",
+                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cbcf913da34646e030b115;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cbcf913da34646e030b113;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-03T12:02:25.836;estadoNotificacionElectronicaId=1461"
+                    },
+                    "reply": {
+                        "operation": "navigateLastFocusedOrOpen",
+                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461"
+                    }
+                    // "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=${variableId}`  // variableId
+                    //http://localhost:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f"
+                    // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461
+                    // http://10.1.36.38:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f
+                    // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aec7c2ed93cde808140;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aec7c2ed93cde80813e;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:16.548;estadoNotificacionElectronicaId=1461"
+                }
+            },
         }
     }
+    /*
+
+    "actions": [{
+                "action": "explore",
+                "title": "Ver el PDF"
+            }]
+
+    */
 
     webpush.sendNotification(
         pushSubscription,
@@ -90,8 +123,9 @@ app.use(routes)*/
 console.log(" direccion de la pagina " +  __dirname+"/public");
 
 // ------------------------------- Pruebas ------------------------------------------------------------
-
+// http://10.1.36.79:39476/api/notificaciones/contribuyente/2063982011
 const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
+
 var XMLHttpRequest = require("xhr2");
 const UsuarioPushModel = require('./models/usuario_push');
 const xhr = new XMLHttpRequest();
@@ -120,20 +154,30 @@ _connect();                     // Realiza la conexion de la base de datos en MO
 app.use((req,res,next) => {
     res.status(404).sendFile(__dirname + "/public/404.html");    // Redireccion De una pagian en HTML que indica, que no debe f
 })
+// TODO KAFKA 
+/*
+const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
+consumer.on('message', function (message) {
+    console.log('Received message:', message.value);
+  });
+  
+  consumer.on('error', function (err) {
+    console.error('Error with Kafka consumer', err);
+  });*/
 
 io.on("connection", socket => {
    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
    io.emit("registroBD", "Send_register_base_datos"); 
 
    socket.on("disconnect", () => {
-       // console.log("El cliente " + socket.id + " se ha desconectado ");
+       console.log("El cliente " + socket.id + " se ha desconectado ");
    });
 
    // Envia el Mensaje del Servidor Hacia el cliente Predeterminado
    socket.on('emisionMensaje', msg => {       
        console.log("_____________________________________________________________________");
        console.log("Mensaje_Notificación", " ====> " , data );
-       //respuestaServicio();
+       respuestaServicio();
        enviarNotificacion();
        io.emit('msgServer', data);            
    });
