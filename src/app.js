@@ -4,11 +4,14 @@ const { createServer } = require("http");     // Creacion de servidor
 const { Server } = require("socket.io");      // Importacion de socket.io
 const { Console } = require("console");       // Importacion para mostrar mensajes en consola 
 const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
-                                                // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
-/*const kafka = require('kafka-node');
+                                              // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
+
+const kafka = require('kafka-node');
 const Consumer = kafka.Consumer;
-const client = new kafka.KafkaClient({ kafkaHost: 'localhost:9092' });
-const topic = 'test';*/
+//const client = new kafka.KafkaClient({ kafkaHost: 'localhost:9092' });
+const client = new kafka.KafkaClient({ kafkaHost: '10.1.36.38:9092' });
+const topic = 'test';
+const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
 const app = express();                        // Se tiene guardado express con su propiedades y sus metodos
 // TODO Importaciones de WEB Push 
 const webpush = require('web-push');
@@ -26,9 +29,27 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 );
 
-//const variableId = "1461";
+const variableId = "1461";
 
-// TODO ENVIO DE NOTIFICACIONES 
+// Modelo para Obtener las notificaciones
+let notificacionesModel = require('./models/notificaciones');        
+
+
+consumer.on('message', function (message) {
+    console.log('Received message:', message.value);
+    notificacionesModel = message.value;
+    console.log("Mensaje Guardado y Recibido");
+    console.log("______________________________________________________________________________________________________");
+    console.log(notificacionesModel);
+
+    //`http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
+
+});
+  
+consumer.on('error', function (err) {
+console.error('Error with Kafka consumer', err);
+});
+
 const enviarNotificacion = (req, res) => {
     const pushSubscription = {
         // https://fcm.googleapis.com/fcm/send/fq6ObFmYAcU:APA91bHNzU5kyaemiw1OJQVvCAkjIYWbz6X7h9PLwyTJmKJW0eAlutAUM-6wpr3c6-sCIxTaXJhdzfAk-It6QmnSxlqvaVSm9LByXtaTEew4KdDDsGCcd5xXVCJQ-mZv0EfvY0qmGYU9
@@ -43,7 +64,7 @@ const enviarNotificacion = (req, res) => {
     const payload = {
         "notification": {
             "title": "Notificacion Administrativa",
-            "body": "AUTO DE MULTA",
+            "body": notificacionesModel.actoAdministrativo,
             "vibrate": [100, 50, 100],
             "actions": [
                 {
@@ -60,9 +81,14 @@ const enviarNotificacion = (req, res) => {
                     },
                     "reply": {
                         "operation": "navigateLastFocusedOrOpen",
-                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461"
+                        "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
                     }
-                    // "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=${variableId}`  // variableId
+                    
+                    // Bienn 
+                    // "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461"
+                    // Bien con un parametro 
+                    //  "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=${variableId}`
+
                     //http://localhost:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f"
                     // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461
                     // http://10.1.36.38:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f
@@ -181,6 +207,14 @@ io.on("connection", socket => {
        enviarNotificacion();
        io.emit('msgServer', data);            
    });
+
+   socket.on("kafka", msg => {
+    console.log(msg);
+    console.log("**********************************************************************************************");
+    console.log(notificacionesModel);
+    
+
+   })
 
    // Esta Sección solo se encarga de reenviar los mensajes
    io.emit("MensajesEspera", usuarioMensajesEnEspera); 

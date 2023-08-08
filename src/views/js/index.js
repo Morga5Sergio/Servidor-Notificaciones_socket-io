@@ -4,6 +4,7 @@ const socket = io();
 const emitToServer = document.querySelector("#emit-to-server");
 const emitDesconectar = document.querySelector("#disconnect");
 const emitReconectar = document.querySelector("#reconectar");
+const consultaDatosKAFKA = document.querySelector('#consultDatosServer');
 
 const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
 // const API_URL = "http://jsonplaceholder.typicode.com";
@@ -65,6 +66,10 @@ emitDesconectar.addEventListener("click", ()=> {
 emitReconectar.addEventListener("click", ()=> {
     socket.connect();
 });
+
+consultaDatosKAFKA.addEventListener("click", ()=> {
+    socket.emit("kafka", "hola");
+})
 
 // TODO Escuchar el evento de la conección
 socket.on('msgServer', msg => {
