@@ -37,12 +37,12 @@ let notificacionesModel = require('./models/notificaciones');
 
 consumer.on('message', function (message) {
     console.log('Received message:', message.value);
-    notificacionesModel = message.value;
+    //notificacionesModel = message.value;
     console.log("Mensaje Guardado y Recibido");
     console.log("______________________________________________________________________________________________________");
     console.log(notificacionesModel);
 
-    //`http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
+    // `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
 
 });
   
@@ -52,24 +52,25 @@ console.error('Error with Kafka consumer', err);
 
 const enviarNotificacion = (req, res) => {
     const pushSubscription = {
-        // https://fcm.googleapis.com/fcm/send/fq6ObFmYAcU:APA91bHNzU5kyaemiw1OJQVvCAkjIYWbz6X7h9PLwyTJmKJW0eAlutAUM-6wpr3c6-sCIxTaXJhdzfAk-It6QmnSxlqvaVSm9LByXtaTEew4KdDDsGCcd5xXVCJQ-mZv0EfvY0qmGYU9
-        // https://fcm.googleapis.com/fcm/send/eG7HlG_xRqc:APA91bEaxnvLp-dE4VqyRd4bisXqXEc-gaLZN4S5J76mLohXepZdrqDmokLreoiuJ3bMRqRhKyO3PKuQp6qVMjTej7e7xJeObvVZQhitY1E8XXvEm48nDxk0nbaJwz-OiPEzjJAhrnj4
-        endpoint: 'https://fcm.googleapis.com/fcm/send/eG7HlG_xRqc:APA91bEaxnvLp-dE4VqyRd4bisXqXEc-gaLZN4S5J76mLohXepZdrqDmokLreoiuJ3bMRqRhKyO3PKuQp6qVMjTej7e7xJeObvVZQhitY1E8XXvEm48nDxk0nbaJwz-OiPEzjJAhrnj4', "expirationTime": null, 
+        
+        //https://fcm.googleapis.com/fcm/send/eiT6gvHd-C0:APA91bHS7CjiAPC7Zp3T-Jx4hFLqFH9vwat4--JsTja0O_iJw9mALX8LUGX6P16xtyYi9fpFC1r-x8F9xKOcAFtlaO1G71S1_SFPRgMUlYfN8IK0GQBGuTS_qH8Q7tC6IlJHjImrDaN_
+        
+        endpoint: 'https://fcm.googleapis.com/fcm/send/cKphyEbibKs:APA91bHxDysxL3ga0VSSN1s60VJfIT7-vyKV30kpW3jQsUS5w9HEOt7s08nO82vlKXrbQ7WXojNZpVpH1qEni5IFZ9gDXWwHi5ieh7KJxPgUSK9LoPgjLPINqjgqyRqNdQkiGFgv_KWt', "expirationTime": null, 
         keys: {
-            auth: 'XH5XMcmWAi_VxzCvUOPiuA', 
-            p256dh: 'BMj5IWg3c2w_bMe1pFUOBrgytjGXTt17p6ehiJWZm1L-6lr20mbZ2AP4qnbHcjUnThUSUHSrH2ig-rxQny02WPk'
+            auth: 'doVghQGiu04RQrFqvloJ4w', 
+            p256dh: 'BHQVIFl9ZO9z0u_QW6tvPmVGKxuTB2sP0K-FG7QeoKGd7vZhzqWp-Yc19wObnC26eobAr4QQpI7FOOU-ddPdj_E'
         }
     };
 
     const payload = {
         "notification": {
-            "title": "Notificacion Administrativa",
-            "body": notificacionesModel.actoAdministrativo,
+            "title": "Notificacion",
+            "body": "Notificacion Administrativa",
             "vibrate": [100, 50, 100],
             "actions": [
                 {
                     "action": "reply",
-                    "title": "Responder",
+                    "title": "Ver PDF",
                     "type": "text"
                 }
             ],
@@ -81,30 +82,13 @@ const enviarNotificacion = (req, res) => {
                     },
                     "reply": {
                         "operation": "navigateLastFocusedOrOpen",
-                        "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
+                        // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64d6b285781f096caa6edc18;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64d6b285781f096caa6edc16;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-11T18:13:25.257;estadoNotificacionElectronicaId=1461
+                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64d6b285781f096caa6edc18;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64d6b285781f096caa6edc16;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-11T18:13:25.257;estadoNotificacionElectronicaId=1461"
                     }
-                    
-                    // Bienn 
-                    // "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461"
-                    // Bien con un parametro 
-                    //  "url": `http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=${variableId}`
-
-                    //http://localhost:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f"
-                    // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461
-                    // http://10.1.36.38:39476/api/notificaciones/constancia/64cd5ac1b11bf71e81db6c5f
-                    // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aec7c2ed93cde808140;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cd5aec7c2ed93cde80813e;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:16.548;estadoNotificacionElectronicaId=1461"
                 }
             },
         }
     }
-    /*
-
-    "actions": [{
-                "action": "explore",
-                "title": "Ver el PDF"
-            }]
-
-    */
 
     webpush.sendNotification(
         pushSubscription,
@@ -112,9 +96,8 @@ const enviarNotificacion = (req, res) => {
         .then(res => {
             console.log('Enviado !!');
         }).catch(err => {
-            console.log('Error', err);
+            console.log("Error", err);
         })
-   //  res.send({ data: 'Se envio subscribete!!' })
 }
 
 app.route('/api/enviar').post(enviarNotificacion);
@@ -137,14 +120,8 @@ const _connect = require('./dbConnection/connection');                      // L
 
 const usuario = [];
 
-let usuarioPrueba = {"usuario_registro":"","usuarioId":"","numeroDocumento":"","tipoDocumentoId":"","nombreDispositivo":"","imei":"","fechaRegisto":"","fechaModificacion":"","estadoId":""};
+
 var usuarioMensajesEnEspera = [];                       // Se va almacenar en el array y se va  preguntar si se envio o no se envio (Por el momento esto es opcional)
-
-/*const routes = require('./routes/index.routes')       // Rutas que se le puede adicionar a la APP otra direcciones -- OPCIONAL si lo requiere el servidor
-app.use(routes)*/
-
-// Motor de plantillas  // Se instalo npm i ejs
-// app.use('view engine', 'ejs');
 
 console.log(" direccion de la pagina " +  __dirname+"/public");
 
@@ -172,24 +149,12 @@ function respuestaServicio(){
 
 
 
-// ------------------------------- Pruebas 2 ----------------------------------
+// ------------------------------- Coneccion ----------------------------------
 _connect();                     // Realiza la conexion de la base de datos en MONGO.
-//obtenerDatos();                 // Obtiene los datos de la coleccion => sad_not_notificaciones_push_prueba
-//obtenerDatosNotificacion();     // Obtiene los datos de la coleccion => sad_not_notificaciones 
 
 app.use((req,res,next) => {
     res.status(404).sendFile(__dirname + "/public/404.html");    // Redireccion De una pagian en HTML que indica, que no debe f
 })
-// TODO KAFKA 
-/*
-const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
-consumer.on('message', function (message) {
-    console.log('Received message:', message.value);
-  });
-  
-  consumer.on('error', function (err) {
-    console.error('Error with Kafka consumer', err);
-  });*/
 
 io.on("connection", socket => {
    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
@@ -212,14 +177,11 @@ io.on("connection", socket => {
     console.log(msg);
     console.log("**********************************************************************************************");
     console.log(notificacionesModel);
-    
-
    })
 
    // Esta Sección solo se encarga de reenviar los mensajes
    io.emit("MensajesEspera", usuarioMensajesEnEspera); 
 
-   // Datos de objMensajeSocket => Estos datos son los siguientes
    // objMensajeSocket = {"id":"8321008", "estado":"ok"}  // Se verificara si existe o no existe   
    socket.on("verificar", objMensajeSocket => {
        console.log("objMensajeSocket " , "     ============================================================================== ");
@@ -241,11 +203,9 @@ io.on("connection", socket => {
                // Ya se encuentra registrado, tiene que eliminarse del array correspondiente.                                
                usuarioMensajesEnEspera = usuarioMensajesEnEspera.filter(notificacion => notificacion.id == objMensajeSocket.id) 
            }            
-       }else {
-           
+       }else {       
            console.log("objMensajeSocket " , " No se encuentra registrado  el usuario correspondiente ==> ");
        }
-
        console.log("ArrayDespues  ", " ==>  " + usuarioMensajesEnEspera );
    });
 });
