@@ -10,6 +10,15 @@ const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/not
 // const API_URL = "http://jsonplaceholder.typicode.com";
 
 
+// KAFKA 
+
+/*const kafka = require('kafka-node');
+const Consumer = kafka.Consumer;
+const client = new kafka.KafkaClient({ kafkaHost: '10.1.34.19:9092' });
+const topic = 'contri-not';
+const consumer = new Consumer(client, [{ topic }], { autoCommit: false });*/ 
+
+
 /*const HTMLResponse = document.querySelector('#app');
 
 const ul = document.createDocumentFragment('ul');
@@ -30,25 +39,6 @@ fetch(`${API_URL}/users`)
 
 /*Primera forma de consumir servicios*/
 
-/*const xhr = new XMLHttpRequest();
-function onRequestHandler(){
-    if(this.readyState == 4 && this.status == 200){
-        // 0 = UNSET, no se ha llamado al metodo open
-        // 1 = OPENED, se ha llamado al meotodo open
-        // 2 = HEADERS_RECEIVED, se esta llamando al metodo send()
-        // 3 = LOADING, se esta cargando, es decir, esta recibiendo la respuesta 
-        // 4 = DONE, se ha completado la operación.
-        console.log(this.response)
-        const data = JSON.parse(this.response); 
-        console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-        const HTMLResponse = document.querySelector('#app');
-        const tpl = data.map((user) => `<li>${user.name} ${user.email}</li>`);
-        HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;
-    } 
-}
-xhr.addEventListener('load', onRequestHandler);
-xhr.open('GET', `${API_URL}`);
-xhr.send();*/
 
 
 // Envia Notificación fasd

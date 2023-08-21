@@ -6,17 +6,20 @@ const { Console } = require("console");       // Importacion para mostrar mensaj
 const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
                                               // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
 
+    //  Importacion de KAFKA Y el consumidor 
 const kafka = require('kafka-node');
 const Consumer = kafka.Consumer;
-//const client = new kafka.KafkaClient({ kafkaHost: 'localhost:9092' });
-const client = new kafka.KafkaClient({ kafkaHost: '10.1.36.38:9092' });
-const topic = 'test';
+const client = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
+const topic = 'contri-not';
 const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
-const app = express();                        // Se tiene guardado express con su propiedades y sus metodos
-// TODO Importaciones de WEB Push 
-const webpush = require('web-push');
-//const cors = require('cors');
+    //  END Importacion de KAFKA Y el consumidor
+
+const app = express(); // Se tiene guardado express con su propiedades y sus metodos
+
+const webpush = require('web-push'); // TODO Importaciones de WEB Push 
 const bodyParser = require('body-parser') 
+// const socket = io(); // Socket Cliente 
+
 
 const vapidKeys = {
     "publicKey":"BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg",
@@ -29,36 +32,16 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 );
 
-const variableId = "1461";
-
 // Modelo para Obtener las notificaciones
 let notificacionesModel = require('./models/notificaciones');        
 
 
-consumer.on('message', function (message) {
-    console.log('Received message:', message.value);
-    //notificacionesModel = message.value;
-    console.log("Mensaje Guardado y Recibido");
-    console.log("______________________________________________________________________________________________________");
-    console.log(notificacionesModel);
-
-    // `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
-
-});
-  
-consumer.on('error', function (err) {
-console.error('Error with Kafka consumer', err);
-});
-
 const enviarNotificacion = (req, res) => {
     const pushSubscription = {
-        
-        //https://fcm.googleapis.com/fcm/send/eiT6gvHd-C0:APA91bHS7CjiAPC7Zp3T-Jx4hFLqFH9vwat4--JsTja0O_iJw9mALX8LUGX6P16xtyYi9fpFC1r-x8F9xKOcAFtlaO1G71S1_SFPRgMUlYfN8IK0GQBGuTS_qH8Q7tC6IlJHjImrDaN_
-        
-        endpoint: 'https://fcm.googleapis.com/fcm/send/cKphyEbibKs:APA91bHxDysxL3ga0VSSN1s60VJfIT7-vyKV30kpW3jQsUS5w9HEOt7s08nO82vlKXrbQ7WXojNZpVpH1qEni5IFZ9gDXWwHi5ieh7KJxPgUSK9LoPgjLPINqjgqyRqNdQkiGFgv_KWt', "expirationTime": null, 
+        endpoint: 'https://fcm.googleapis.com/fcm/send/f9Z3JRJ9bm0:APA91bEsqJQS_QSf_J4RYA4aB1FukA7Pzok4YDdL3JVAzre4kDSs9PZyNhTtHSva1wTsh_j__ZlwzFxuEzFQJdRo34eYOr1mAxDY2QZnDdc3hJoOGrTnCZPhI1ck1H9CK9hG85zeihjf', "expirationTime": null,
         keys: {
-            auth: 'doVghQGiu04RQrFqvloJ4w', 
-            p256dh: 'BHQVIFl9ZO9z0u_QW6tvPmVGKxuTB2sP0K-FG7QeoKGd7vZhzqWp-Yc19wObnC26eobAr4QQpI7FOOU-ddPdj_E'
+            auth: '2XtqkaejYO84Znh9TI89Jw', 
+            p256dh: 'BLjuKStk5Pu9LmvD2xqpbZY0vT0a8iBACPw1nt49qeHkOFc8MLPPU5xJ5Wf1RYmkXR1iF_TrDxEYDNuiTJuZkw8'
         }
     };
 
@@ -110,13 +93,17 @@ app.use(express.static(path.join(__dirname, "views"))); // Añadiendo archivos e
 app.get("/", (req, res)=> {
         res.sendFile(__dirname + "/views/index.html");
 });
-let data= [];
+
+let data= [];  // Datos del servicio de la notificación 
+
+  
+consumer.on('error', function (err) {
+    console.error('Error with Kafka consumer', err);
+});
 
 
 
 const _connect = require('./dbConnection/connection');                      // Llama al archivo para la conexion de la base de datos en MONGO 
-// const obtenerDatos = require('./controllers/index.controller')              // Llama al archivo para el  proceso de la obtención de los datos en MONGO
-// const obtenerDatosNotificacion = require('./controllers/index.controller');
 
 const usuario = [];
 
@@ -156,7 +143,35 @@ app.use((req,res,next) => {
     res.status(404).sendFile(__dirname + "/public/404.html");    // Redireccion De una pagian en HTML que indica, que no debe f
 })
 
+
+
 io.on("connection", socket => {
+
+    consumer.on('message', function (message) {
+        console.log('Received message _ Servidor :', message.value);
+        //notificacionesModel = message.value;
+        
+        console.log("Mensaje Guardado y Recibido");
+        console.log("______________________________________________________________________________________________________");  
+        respuestaServicio();
+        console.log("------------------------------------------------------------------------------------------------------------------------");
+        console.log("--------------------------------------------------------  DATOS DEL CAMPO ----------------------------------------------------------");
+        console.log(data);
+        io.emit('msgServer', data);   // El socket emite la notificacion a los clientes Movil        
+        enviarNotificacion();  // Funcion que envia la notificacion a los clientes WEB
+        /*if(NIT){
+            enviarNotificacion();  // WEB
+            
+        }*/    
+        
+        // console.log(notificacionesModel);
+        //validacion 
+        
+        // `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
+        
+        // io.addListener
+    });
+
    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
    io.emit("registroBD", "Send_register_base_datos"); 
 
@@ -165,49 +180,15 @@ io.on("connection", socket => {
    });
 
    // Envia el Mensaje del Servidor Hacia el cliente Predeterminado
+
    socket.on('emisionMensaje', msg => {       
-       console.log("_____________________________________________________________________");
        console.log("Mensaje_Notificación", " ====> " , data );
-       respuestaServicio();
        enviarNotificacion();
        io.emit('msgServer', data);            
    });
 
-   socket.on("kafka", msg => {
-    console.log(msg);
-    console.log("**********************************************************************************************");
-    console.log(notificacionesModel);
-   })
-
    // Esta Sección solo se encarga de reenviar los mensajes
    io.emit("MensajesEspera", usuarioMensajesEnEspera); 
-
-   // objMensajeSocket = {"id":"8321008", "estado":"ok"}  // Se verificara si existe o no existe   
-   socket.on("verificar", objMensajeSocket => {
-       console.log("objMensajeSocket " , "     ============================================================================== ");
-       console.log("objMensajeSocket " , objMensajeSocket);    
-       console.log("objMensajeSocket Usuario => " , usuario);    
-
-       console.log("objMensajeSocket " , objMensajeSocket);
-       var index = usuario.map(element => element.id).indexOf(objMensajeSocket.id);
-   
-       console.log("objMensajeSocket ",  " ==> Valor del indice encontrado   " , index);
-
-       console.log("ArrayAntes  ", " ==>  " + usuarioMensajesEnEspera );
-       if(index >= 0){
-           if(usuario[index].estado == "ninguno" ){
-               // Se almacenara los datos para reenviar la notificación nuevamente si este no se envio                
-               usuarioMensajesEnEspera.push(usuario[index]);
-               usuario[index].estado =  "ok"
-           }else {                
-               // Ya se encuentra registrado, tiene que eliminarse del array correspondiente.                                
-               usuarioMensajesEnEspera = usuarioMensajesEnEspera.filter(notificacion => notificacion.id == objMensajeSocket.id) 
-           }            
-       }else {       
-           console.log("objMensajeSocket " , " No se encuentra registrado  el usuario correspondiente ==> ");
-       }
-       console.log("ArrayDespues  ", " ==>  " + usuarioMensajesEnEspera );
-   });
 });
 
 httpServer.listen(process.env.PORT , ()=> {
