@@ -2,11 +2,11 @@ const express = require('express');           // Framework de nodeJs Express
 const path = require("path");                 // path 
 const { createServer } = require("http");     // Creacion de servidor
 const { Server } = require("socket.io");      // Importacion de socket.io
-const { Console } = require("console");       // Importacion para mostrar mensajes en consola 
+const { Console, log } = require("console");       // Importacion para mostrar mensajes en consola 
 const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
                                               // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
 
-    //  Importacion de KAFKA Y el consumidor 
+    //  Importacion  KAFKA consumidor 
 const kafka = require('kafka-node');
 const Consumer = kafka.Consumer;
 const client = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
@@ -16,16 +16,11 @@ const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
 
 const app = express(); // Se tiene guardado express con su propiedades y sus metodos
 
-const webpush = require('web-push'); // TODO Importaciones de WEB Push 
-const bodyParser = require('body-parser') 
-// const socket = io(); // Socket Cliente 
-
-
-const vapidKeys = {
+const webpush = require('web-push'); // TODO Importaciones de WEB Push_ para WEB 
+const vapidKeys = {  // Llaves publicas y privadas 
     "publicKey":"BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg",
     "privateKey":"0giCCcZw9RhRoqoeO1Ejy2SsIFb6n4460Shf4oWk2Bc"
 }
-
 webpush.setVapidDetails(
     'mailto:example@yourdomain.org',
     vapidKeys.publicKey,
@@ -34,14 +29,19 @@ webpush.setVapidDetails(
 
 // Modelo para Obtener las notificaciones
 let notificacionesModel = require('./models/notificaciones');        
+let mensajeNotificacionKafka = require('./models/mensaje_kafka');
 
 
+
+
+
+// Mensaje para enviar las notificaciones Push 
 const enviarNotificacion = (req, res) => {
     const pushSubscription = {
-        endpoint: 'https://fcm.googleapis.com/fcm/send/f9Z3JRJ9bm0:APA91bEsqJQS_QSf_J4RYA4aB1FukA7Pzok4YDdL3JVAzre4kDSs9PZyNhTtHSva1wTsh_j__ZlwzFxuEzFQJdRo34eYOr1mAxDY2QZnDdc3hJoOGrTnCZPhI1ck1H9CK9hG85zeihjf', "expirationTime": null,
+        endpoint: 'https://fcm.googleapis.com/fcm/send/cfn71EzU01M:APA91bHQilDlT83Ckj1hOeshK2hJGwlUIOMW3pUZQsm8pikekA-LaFJGhpdoaiieFAfPI9kK3bARFuJGnNelUj-9cqczn-WZo5wpvNNSv90zNNv7P4gHsEgk_xmABDzMf4B2lymFff1x', "expirationTime": null,
         keys: {
-            auth: '2XtqkaejYO84Znh9TI89Jw', 
-            p256dh: 'BLjuKStk5Pu9LmvD2xqpbZY0vT0a8iBACPw1nt49qeHkOFc8MLPPU5xJ5Wf1RYmkXR1iF_TrDxEYDNuiTJuZkw8'
+            auth: 'PYMg_YRTlL24xDR8ZkNj-g',
+            p256dh: 'BMpaPokq6OJmGLwouIY2bneiECywHNkWumEH-jfpxFiRnfSuEiaynBWyeAROkEN88OE8Cv-b-qVN3lO28nfoOCc'
         }
     };
 
@@ -96,7 +96,6 @@ app.get("/", (req, res)=> {
 
 let data= [];  // Datos del servicio de la notificación 
 
-  
 consumer.on('error', function (err) {
     console.error('Error with Kafka consumer', err);
 });
@@ -110,63 +109,139 @@ const usuario = [];
 
 var usuarioMensajesEnEspera = [];                       // Se va almacenar en el array y se va  preguntar si se envio o no se envio (Por el momento esto es opcional)
 
-console.log(" direccion de la pagina " +  __dirname+"/public");
+// console.log(" direccion de la pagina " +  __dirname+"/public");
 
 // ------------------------------- Pruebas ------------------------------------------------------------
 // http://10.1.36.79:39476/api/notificaciones/contribuyente/2063982011
-const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
+// const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
 
+// const API_URL = "https://desasiatservicios.impuestos.gob.bo/sad-not-rest/api/notificaciones/contribuyente/2063982011"
+const API_URL = "http://localhost:39476/api/listadoUsuarios/2063982";
 var XMLHttpRequest = require("xhr2");
 const UsuarioPushModel = require('./models/usuario_push');
 const xhr = new XMLHttpRequest();
 
+// TODO CONSUMO DEL SERVI
+
 function onRequestHandler(){
+    console.log(this.readyState + " ---Respuesta del servicio");
+    console.log(this.status + " ---Respuesta del servicio");
+    
     if(this.readyState == 4 && this.status == 200){
         data = JSON.parse(this.response); 
         //console.log("----------  Respuesta del servicio externo --------------");
-        //console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+        console.log("Respuesta del servicio");
+        console.log(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
     } 
 }
 
 function respuestaServicio(){
+    console.log("Entra Al consumir el servicio POST")
+
     xhr.addEventListener('load', onRequestHandler);
     xhr.open('GET', `${API_URL}`);
+    xhr.setRequestHeader('Authorization', 'Token ' + "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJHRU5FUklDTyIsImlkIjoxMDAwLCJleHAiOjE2OTI5MTc2NDQsImlhdCI6MTY5MjkwMjkxNH0.oI2uRXh04PVoDFvg3phZyAgp228T-ltKHNTUqpsHVXmnHmKYku4lWZhnqO1-ip083d9lRhCRVgp6WVPQSMEXag");
     xhr.send();
 }
 
+// Nueva Funcion 
 
+function makeHttpRequest(url, method = "GET") {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${API_URL}`);
+        xhr.setRequestHeader('Authorization', 'Token ' + "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJHRU5FUklDTyIsImlkIjoxMDAwLCJleHAiOjE2OTI5MTc2NDQsImlhdCI6MTY5MjkwMjkxNH0.oI2uRXh04PVoDFvg3phZyAgp228T-ltKHNTUqpsHVXmnHmKYku4lWZhnqO1-ip083d9lRhCRVgp6WVPQSMEXag");
+        xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.responseText);
+        } else {
+            reject(new Error(`Error en la solicitud: ${xhr.statusText}`));
+        }
+        };
+  
+        xhr.onerror = () => {
+        reject(new Error("Error en la solicitud"));
+        };
+
+        xhr.send();
+    });
+}
+
+// respuestaServicio();
 
 // ------------------------------- Coneccion ----------------------------------
-_connect();                     // Realiza la conexion de la base de datos en MONGO.
+_connect(); // Realiza la conexion de la base de datos en MONGO.
 
 app.use((req,res,next) => {
     res.status(404).sendFile(__dirname + "/public/404.html");    // Redireccion De una pagian en HTML que indica, que no debe f
 })
 
-
-
 io.on("connection", socket => {
 
     consumer.on('message', function (message) {
-        console.log('Received message _ Servidor :', message.value);
-        //notificacionesModel = message.value;
+        console.log('Received message _ Servidor :', message.value);    
+        console.log('Received message _ without value :', JSON.parse(message.value));    
+        mensajeNotificacionKafka = JSON.parse(message.value);    
         
+        console.log("-----------------------------------------------  Notificaciones KAFKA ---------------------------------------------"); 
+        console.log(mensajeNotificacionKafka);
+        console.log("-----------------------------------------------  Solo el NIT    ---------------------------------------------"); 
+        console.log(mensajeNotificacionKafka.nit);
+        console.log("-----------------------------------------------  Prueba Para Dar Cotrnollafsd    ---------------------------------------------"); 
+
+        makeHttpRequest(API_URL)
+            .then((response) => {
+
+            console.log("Preuba_de_Notificaciones")
+            console.log("Respuesta:", response);
+        })
+            .catch((error) => {
+            console.error("Error:", error.message);
+        });
+
+
+
+        /* const miPromesa = new Promise(()=> {
+            respuestaServicio();
+            setTimeout(() => {
+                console.log('este es el valor que eventualmente devolverá la promesa');
+              }, 300);
+        }); */
+
+        //respuestaServicio();
+
+        /*
+        miPromesa.then(()=> {
+            Log.i("-------------------------- Datos del Campo de la promesa ---------------------------------");
+            console.log(data);
+        }).catch(()=>{
+
+        });
+        */
+        // console.log(miPromesa)
+        /*respuestaServicio().then(()=> {
+               console.log("La promesa se Cumplio"); 
+        }).catch(()=> {
+               console.log("La promesa no se Cumplio");
+        });*/
+
+
+        
+        //notificacionesModel = message.value;        
         console.log("Mensaje Guardado y Recibido");
         console.log("______________________________________________________________________________________________________");  
-        respuestaServicio();
+        // respuestaServicio();
         console.log("------------------------------------------------------------------------------------------------------------------------");
         console.log("--------------------------------------------------------  DATOS DEL CAMPO ----------------------------------------------------------");
-        console.log(data);
-        io.emit('msgServer', data);   // El socket emite la notificacion a los clientes Movil        
-        enviarNotificacion();  // Funcion que envia la notificacion a los clientes WEB
+        // console.log(data);
+        // io.emit('msgServer', data);   // El socket emite la notificacion a los clientes Movil        
+        // enviarNotificacion();  // Funcion que envia la notificacion a los clientes WEB
         /*if(NIT){
             enviarNotificacion();  // WEB
             
         }*/    
-        
         // console.log(notificacionesModel);
         //validacion 
-        
         // `http://localhost:4200/notificacionespdf;notificacionElectronicaId=${notificacionesModel.notificacionElectronicaId};nroActoAdministrativo=${notificacionesModel.nroActoAdministrativo};actoAdministrativo=${notificacionesModel.actoAdministrativo};fechaActoAdministrativo=${notificacionesModel.fechaActoAdministrativo};archivoAdjuntoActuadoId=${notificacionesModel.archivoAdjuntoActuado};cantidadLecturas=${notificacionesModel.cantidadLecturas};fechaEnvioNotificacion=${notificacionesModel.fechaEnvioNotificacion};estadoNotificacionElectronicaId=${notificacionesModel.estadoNotificacionElectronicaId}`
         
         // io.addListener
