@@ -10,7 +10,9 @@ let mensajeNotificacionKafka = {
    ,cabecera:""
    ,cuerpo:""
    ,enlac:""
-   ,imagen:"",origen:"",cantidadLectura:0
+   ,imagen:""
+   ,origen:""
+   ,cantidadLectura:0
    ,nit:""
 }
 

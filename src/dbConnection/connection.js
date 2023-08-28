@@ -16,7 +16,7 @@ const uri = `mongodb://dsin:${process.env.MONGO_PASSWORD}@dcbdmongo.impuestos.go
              useNewUrlParser:true
             }).then(
                 ()=>{
-                   console.log("La conexion de la base de datos se conecto correctamente fsd")     
+                   console.log("La conexion de la base de datos se conecto correctamente")     
                 },
                 (err) => {
                     console.log("connection error", err);
