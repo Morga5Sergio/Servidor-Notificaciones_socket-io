@@ -26,11 +26,13 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 );
 
+
+
 // Modelo para Obtener las notificaciones
 let mensajeNotificacionKafka = require('./models/mensaje_kafka');
 let responseToken = require('./models/token_model');
 let listaDispositivos = require('./models/lista_dispositivos');
-
+let modeloNoti = require('./models/modelos_noti');
 const httpServer = createServer(app);         // Le http es el que inicia el servidor, Now can use the app as if you were http.
 require('dotenv').config();                   // Para las variables de entorno, con las pruebas de seguridad. 
 const io = new Server(httpServer, {cors: { origin: '*'} });            // Constante io para el servidor Socket.io
@@ -52,6 +54,7 @@ _connect(); // Realiza la conexion de la base de datos en MONGO.
 var XMLHttpRequest = require("xhr2");
 const xhr = new XMLHttpRequest();
 
+
 io.on("connection", socket => {
     // TODO Envio de Notificacion Tanto para dispositivos WEB y MOBILE
     consumer.on('message', function (message) {
@@ -59,7 +62,8 @@ io.on("connection", socket => {
         mensajeNotificacionKafka = JSON.parse(message.value);    
         
         console.log("-----------------------------------------------  Notificaciones KAFKA ---------------------------------------------"); 
-        console.log(mensajeNotificacionKafka + " NIT =>  " + mensajeNotificacionKafka.nit);
+        console.log(mensajeNotificacionKafka);
+        console.log(" NIT =>  " + mensajeNotificacionKafka.nit);
     
         const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensajeNotificacionKafka.nit;
         console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
@@ -87,25 +91,43 @@ io.on("connection", socket => {
                 console.log("  ---------------------- Prueba de respuesta FINAL ------------------------------ "); 
                 console.log(listaDispositivos)
                 console.log(" Dato");
-                usuarioTokenDtos = listaDispositivos.usuarioTokenDtos;
-                console.log("  ----- usuarioTokenDtos usuarioTokenDtos usuarioTokenDtos  ----- ");
-                console.log("Tamaño del array ==> " + usuarioTokenDtos.length + "  Datos_ Nombre del Dispositivo ==> " + usuarioTokenDtos[0].nombreDispositivo );
-
+                usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
+                console.log(usuarioTokenDtos);
+                console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  ----- "  + usuarioTokenDtos.length );
+                
+                //console.log("Tamaño del array ==> " + usuarioTokenDtos.length: + "  Datos_ Nombre del Dispositivo ==> " + usuarioTokenDtos[0].nombreDispositivo );
+                
                 if(usuarioTokenDtos.length > 0){
+                    console.log("gsfsdfdsfsdfsd ");
+                    // console.log(element.webId);
                     usuarioTokenDtos.forEach(element => {
-                        if(element.webId != ""){
-                            console.log("ENVIANDO NOTIFICAION PARA WEB");
-                            enviarNotificacion();           // NOtificacion ENVIADO PARA WEB
+                        modeloNoti = element;
+                        console.log("Datosfsdfds");
+                        console.log(modeloNoti);
+                        console.log("--- Noitiicasd --- ");
+                        console.log(modeloNoti.tokenPush);
+                        if(modeloNoti.webId != ""){
+                            //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
+                            if(modeloNoti.tokenPush == "ACTIVO"){
+                                console.log("ENVIANDO NOTIFICAION PARA WEB");                                
+                                
+                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb);
+                            }                    
                         }else{
-                            console.log("ENVIANDO Notificacion para movil")
-                            // io.emit('msgServer', data);     // Notificacion Enviadad para movil       
+                            console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
+                            if(modeloNoti.tokenPush == "ACTIVO"){
+                                // 2063982011
+                                io.emit(mensajeNotificacionKafka.nit, mensajeNotificacionKafka.idNotificacion);     // Notificacion Enviadad para movil       
+                                // io.emit(mensajeNotificacionKafka.nit, "EsteVahacer el id");     // Notificacion Enviadad para movil       
+                                //io.emit("2063982011", "EsteVahacer el id");     // Notificacion Enviadad para movil       
+                            }                        
+                            // mensajeNotificacionKafka.nit                            
                         }
                     });
                 }else {
                     console.log(" No se han encontrado una lista de dispositivos en el NIT Correspondiente ");
                 }
-            })
-                .catch((error) => {
+            }).catch((error) => {
                 console.error("Error Final :", error.message);
             });
         })
@@ -130,13 +152,16 @@ httpServer.listen(process.env.PORT , ()=> {
 
 
 
-// Mensaje para enviar las notificaciones Push 
-const enviarNotificacion = (req, res) => {
+function envioNotificacion(endPointWeb, keyWeb, authWeb){
+    console.log("EndPointWeb  ==>  " + endPointWeb );
+    console.log("keyWeb ==> " + keyWeb );
+    console.log("authWeb ==> " + authWeb );
+
     const pushSubscription = {
-        endpoint: 'https://fcm.googleapis.com/fcm/send/cfn71EzU01M:APA91bHQilDlT83Ckj1hOeshK2hJGwlUIOMW3pUZQsm8pikekA-LaFJGhpdoaiieFAfPI9kK3bARFuJGnNelUj-9cqczn-WZo5wpvNNSv90zNNv7P4gHsEgk_xmABDzMf4B2lymFff1x', "expirationTime": null,
+        endpoint: endPointWeb, "expirationTime": null,
         keys: {
-            auth: 'PYMg_YRTlL24xDR8ZkNj-g',
-            p256dh: 'BMpaPokq6OJmGLwouIY2bneiECywHNkWumEH-jfpxFiRnfSuEiaynBWyeAROkEN88OE8Cv-b-qVN3lO28nfoOCc'
+            auth: authWeb,
+            p256dh: keyWeb
         }
     };
 
@@ -148,7 +173,7 @@ const enviarNotificacion = (req, res) => {
             "actions": [
                 {
                     "action": "reply",
-                    "title": "Ver PDF",
+                    "title": "Ir a ver la notificación",
                     "type": "text"
                 }
             ],
@@ -161,7 +186,7 @@ const enviarNotificacion = (req, res) => {
                     "reply": {
                         "operation": "navigateLastFocusedOrOpen",
                         // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64d6b285781f096caa6edc18;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64d6b285781f096caa6edc16;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-11T18:13:25.257;estadoNotificacionElectronicaId=1461
-                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64d6b285781f096caa6edc18;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64d6b285781f096caa6edc16;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-11T18:13:25.257;estadoNotificacionElectronicaId=1461"
+                        "url": "http://localhost:38071/con/notificaciones"
                     }
                 }
             },
@@ -179,9 +204,7 @@ const enviarNotificacion = (req, res) => {
 }
 
 //app.route('/api/enviar').post(enviarNotificacion);  // Servicio Para enviar la notificacion
-
 // FUNCIONES PARA OBTENER LOS SERVECIOS
-
 function getToken(pApiUrlToken){
     return new Promise((resolve, reject) => {
         const xhrToken = new XMLHttpRequest();
