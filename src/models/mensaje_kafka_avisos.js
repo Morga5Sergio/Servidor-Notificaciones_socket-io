@@ -1,0 +1,19 @@
+let mensajeAvisosKafka ={
+    id:"",
+    usuarioRegistroId:0,
+    usuarioUltimaModificacionId:0,
+    fechaRegistro:0,
+    fechaUltimaModificacion:0,
+    estadoId:"",
+    avisoPushId:"",
+    idAviso:"",
+    cabecera:"",
+    cuerpo:"",
+    enlace:"",
+    imagen:"",
+    origen:"",
+    cantidadLectura:0,
+    nit:0,
+    avisos:"",
+    pdfId:""
+} 

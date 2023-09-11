@@ -11,7 +11,16 @@ const Consumer = kafka.Consumer;
 const client = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
 const topic = 'notificaciones-web';
 const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
-    //  END Importacion de KAFKA Y el consumidor
+
+
+// Kafka para Avisos
+
+const ConsumerAvisos = kafka.Consumer;
+const clientAvisos = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
+const topicAvisos = 'avisos-push';
+const consumerAvisos = new ConsumerAvisos(clientAvisos, [{ topic: topicAvisos }], { autoCommit: false });
+
+//  END Importacion de KAFKA Y el consumidor
 
 const app = express(); // Se tiene guardado express con su propiedades y sus metodos
 
@@ -30,6 +39,7 @@ webpush.setVapidDetails(
 
 // Modelo para Obtener las notificaciones
 let mensajeNotificacionKafka = require('./models/mensaje_kafka');
+let mensaje_kafka_avisos = require('./models/mensaje_kafka_avisos');
 let responseToken = require('./models/token_model');
 let listaDispositivos = require('./models/lista_dispositivos');
 let modeloNoti = require('./models/modelos_noti');
@@ -45,6 +55,10 @@ app.get("/", (req, res)=> {res.sendFile(__dirname + "/views/index.html");});
 let usuarioTokenDtos = [];  // Datos de los Usuarios para enviar notificaciones 
 
 consumer.on('error', function (err) {
+    console.error('Error with Kafka consumer', err);
+});
+
+consumerAvisos.on('error', function (err) {
     console.error('Error with Kafka consumer', err);
 });
 
@@ -127,16 +141,99 @@ io.on("connection", socket => {
                             }                    
                         }else{
                             console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
+                            if(modeloNoti.tokenPush == "ACTIVO"){                        
+                                envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion;                                                        
+                                io.emit(mensajeNotificacionKafka.nit, envioPhone, "notificaciones");     // Notificacion Enviadad para movil                               
+                            }                                                                      
+                        }
+                    });
+                }else {
+                    console.log(" No se han encontrado una lista de dispositivos en el NIT Correspondiente ");
+                }
+            }).catch((error) => {
+                console.error("Error Final :", error.message);
+            });
+        })
+            .catch((error) => {
+            console.error("Error Obtener Token==>:", error.message);
+        });
+    
+    });
+
+    consumerAvisos.on('message', function (message) {
+        console.log("Avisos ", " mensajes " , message );
+
+        console.log('Received message _ without value :', JSON.parse(message.value));    
+        mensaje_kafka_avisos = JSON.parse(message.value);    
+        
+        console.log("-----------------------------------------------  Notificaciones KAFKA ---------------------------------------------"); 
+        console.log(mensaje_kafka_avisos);
+        console.log(" NIT =>  " + mensaje_kafka_avisos.nit);
+    
+        const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensaje_kafka_avisos.nit;
+        console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
+        console.log(API_URL_Lista_Usuario);
+        // De aqui obtengo el NIT Correspondiente para las notificaciones.
+
+        const API_URL_TOKEN = "https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000";
+        getToken(API_URL_TOKEN)
+            .then((responseTokenD) => {
+                console.log("Respusta de Notificacion")                
+                responseToken = JSON.parse(responseTokenD)
+                console.log("Dato del Token Obtenido",  responseToken);                
+                //token = response.token; 
+                const tokenRespuesta = responseToken.token;
+                console.log(responseToken.token); 
+                // Nombre del Dispositivo
+                // Ahora se realiza la respues de los otros datos 
+            makeHttpRequest(tokenRespuesta, API_URL_Lista_Usuario)
+                .then((response) => {
+                console.log("Respuesta Final ")
+                console.log("Respuesta:", response);
+                listaDispositivos = JSON.parse(response);
+                console.log("  ---------------------- Prueba de respuesta FINAL ------------------------------ "); 
+                console.log(listaDispositivos)
+                console.log(" Dato");
+                usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
+                console.log(usuarioTokenDtos);
+                console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  ----- "  + usuarioTokenDtos.length );
+                
+                //console.log("Tamaño del array ==> " + usuarioTokenDtos.length: + "  Datos_ Nombre del Dispositivo ==> " + usuarioTokenDtos[0].nombreDispositivo );
+                
+                if(usuarioTokenDtos.length > 0){                
+                    // console.log(element.webId);
+                    envioPhone.arrayImei = [];
+                    usuarioTokenDtos.forEach(element => {
+                        modeloNoti = element;
+                        if(modeloNoti.imei != "" ){
+                            if(modeloNoti.tokenPush == "ACTIVO"){
+                                envioPhone.arrayImei.push(modeloNoti.imei);
+                            }
+                            
+                        }
+                    });
+                    usuarioTokenDtos.forEach(element => {
+                        modeloNoti = element;
+                        console.log(modeloNoti);
+                        console.log("--- Noitiicasd --- ");
+                        console.log(modeloNoti.tokenPush);
+                        if(modeloNoti.webId != ""){
+                            //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
+                            if(modeloNoti.tokenPush == "ACTIVO"){
+                                console.log("ENVIANDO NOTIFICAION PARA WEB");                                
+                                
+                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb);
+                            }                    
+                        }else{
+                            console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
                             if(modeloNoti.tokenPush == "ACTIVO"){
                                 // 2063982011
                                 /*if(modeloNoti.imei ){
 
                                 }*/
-                                envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion;                            
-                                //  mensajeNotificacionKafka.idNotificacion
-                                io.emit(mensajeNotificacionKafka.nit, envioPhone);     // Notificacion Enviadad para movil       
-                                // io.emit(mensajeNotificacionKafka.nit, "EsteVahacer el id");     // Notificacion Enviadad para movil       
-                                //io.emit("2063982011", "EsteVahacer el id");     // Notificacion Enviadad para movil       
+                                envioPhone.idNotificacion = mensaje_kafka_avisos.idAviso;                            
+                                io.emit(mensajeNotificacionKafka.nit, envioPhone, "avisos");     // Notificacion Enviadad para movil       
+                                       
                             }                        
                             // mensajeNotificacionKafka.nit                            
                         }
@@ -151,7 +248,8 @@ io.on("connection", socket => {
             .catch((error) => {
             console.error("Error Obtener Token==>:", error.message);
         });
-    
+
+
     });
 
    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
