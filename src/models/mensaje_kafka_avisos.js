@@ -17,3 +17,5 @@ let mensajeAvisosKafka ={
     avisos:"",
     pdfId:""
 } 
+
+module.exports = mensajeAvisosKafka;

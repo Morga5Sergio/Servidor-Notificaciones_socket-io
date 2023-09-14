@@ -44,7 +44,8 @@ let responseToken = require('./models/token_model');
 let listaDispositivos = require('./models/lista_dispositivos');
 let modeloNoti = require('./models/modelos_noti');
 
-let envioPhone = {"idNotificacion":"", "arrayImei":[]};
+let envioPhone = {"idNotificacion":"", "arrayImei":[], "tipo":"notificacion"};
+let envioPhoneAvisos = {"idAvisos":"", "arrayImei":[], "tipo": "avisos"};
 const httpServer = createServer(app);         // Le http es el que inicia el servidor, Now can use the app as if you were http.
 require('dotenv').config();                   // Para las variables de entorno, con las pruebas de seguridad. 
 const io = new Server(httpServer, {cors: { origin: '*'} });            // Constante io para el servidor Socket.io
@@ -114,7 +115,6 @@ io.on("connection", socket => {
                 //console.log("Tamaño del array ==> " + usuarioTokenDtos.length: + "  Datos_ Nombre del Dispositivo ==> " + usuarioTokenDtos[0].nombreDispositivo );
                 
                 if(usuarioTokenDtos.length > 0){
-                    console.log("gsfsdfdsfsdfsd ");
                     // console.log(element.webId);
                     envioPhone.arrayImei = [];
                     usuarioTokenDtos.forEach(element => {
@@ -136,14 +136,15 @@ io.on("connection", socket => {
                             //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
                             if(modeloNoti.tokenPush == "ACTIVO"){
                                 console.log("ENVIANDO NOTIFICAION PARA WEB");                                
-                                
-                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb);
+                                // Enviar mensaje idNOtificacion , mensajeNotificacionKafka.idNotificacion
+                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeNotificacionKafka.cabecera, mensajeNotificacionKafka.cuerpo);
                             }                    
                         }else{
                             console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
                             if(modeloNoti.tokenPush == "ACTIVO"){                        
                                 envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion;                                                        
-                                io.emit(mensajeNotificacionKafka.nit, envioPhone, "notificaciones");     // Notificacion Enviadad para movil                               
+                                console.log(" nit ", mensajeNotificacionKafka.nit  , " ===> ");
+                                io.emit(mensajeNotificacionKafka.nit, envioPhone);     // Notificacion Enviadad para movil                               
                             }                                                                      
                         }
                     });
@@ -202,12 +203,12 @@ io.on("connection", socket => {
                 
                 if(usuarioTokenDtos.length > 0){                
                     // console.log(element.webId);
-                    envioPhone.arrayImei = [];
+                    envioPhoneAvisos.arrayImei = [];
                     usuarioTokenDtos.forEach(element => {
                         modeloNoti = element;
                         if(modeloNoti.imei != "" ){
                             if(modeloNoti.tokenPush == "ACTIVO"){
-                                envioPhone.arrayImei.push(modeloNoti.imei);
+                                envioPhoneAvisos.arrayImei.push(modeloNoti.imei);
                             }
                             
                         }
@@ -221,21 +222,19 @@ io.on("connection", socket => {
                             //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
                             if(modeloNoti.tokenPush == "ACTIVO"){
                                 console.log("ENVIANDO NOTIFICAION PARA WEB");                                
-                                
-                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb);
+                                // LLamar el servicio 
+                                // http://localhost:39476/api/notificaciones/65030afbfff6213db6c34c36
+                                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_kafka_avisos.cabecera, mensaje_kafka_avisos.cuerpo );
                             }                    
                         }else{
-                            console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
-                            if(modeloNoti.tokenPush == "ACTIVO"){
-                                // 2063982011
-                                /*if(modeloNoti.imei ){
-
-                                }*/
-                                envioPhone.idNotificacion = mensaje_kafka_avisos.idAviso;                            
-                                io.emit(mensajeNotificacionKafka.nit, envioPhone, "avisos");     // Notificacion Enviadad para movil       
+                            console.log("ENVIANDO Avisos PARA MOVIL"); // 2063982011                            
+                            console.log(" Notificaciones Push movil ==> " + modeloNoti.tokenPush );
+                            if(modeloNoti.tokenPush == "ACTIVO"){                            
+                                envioPhoneAvisos.idAvisos = mensaje_kafka_avisos.idAviso;                       
+                                console.log("ENVIANDO Avisos PARA MOVIL envio directo"); // 2063982011                                 
+                                io.emit(mensaje_kafka_avisos.nit, envioPhoneAvisos);    // cuer   
                                        
-                            }                        
-                            // mensajeNotificacionKafka.nit                            
+                            }                                                
                         }
                     });
                 }else {
@@ -248,8 +247,6 @@ io.on("connection", socket => {
             .catch((error) => {
             console.error("Error Obtener Token==>:", error.message);
         });
-
-
     });
 
    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
@@ -266,8 +263,8 @@ httpServer.listen(process.env.PORT , ()=> {
 })
 
 
-
-function envioNotificacion(endPointWeb, keyWeb, authWeb){
+// , idNotificacion
+function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo){
     console.log("EndPointWeb  ==>  " + endPointWeb );
     console.log("keyWeb ==> " + keyWeb );
     console.log("authWeb ==> " + authWeb );
@@ -282,31 +279,44 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb){
 
     const payload = {
         "notification": {
-            "title": "Notificacion",
-            "body": "Notificacion Administrativa",
+            "title": cabecera,
+            "body": cuerpo,
             "vibrate": [100, 50, 100],
             "actions": [
                 {
                     "action": "reply",
                     "title": "Ir a ver la notificación",
                     "type": "text"
-                }
+                },
+                {
+                    "action": "reply",
+                    "title": "Prueba",
+                    "type": "text"
+                },
+                {
+                    "action": "reply",
+                    "title": "Prueba_12222",
+                    "type": "text"
+                },
             ],
             "data": {
-                "onActionClick": {
-                    "default": {
-                        "operation": "navigateLastFocusedOrOpen",
-                        "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cbcf913da34646e030b115;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cbcf913da34646e030b113;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-03T12:02:25.836;estadoNotificacionElectronicaId=1461"
-                    },
+                "onActionClick": {                    
                     "reply": {
                         "operation": "navigateLastFocusedOrOpen",
                         // http://localhost:4200/notificacionespdf;notificacionElectronicaId=64d6b285781f096caa6edc18;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64d6b285781f096caa6edc16;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-11T18:13:25.257;estadoNotificacionElectronicaId=1461
-                        "url": "http://localhost:4200/con/notificaciones"
+                        //"url": "http://localhost:4200/con/notificaciones/"
                     }
                 }
             },
         }
     }
+
+    /*
+    "default": {
+                "operation": "navigateLastFocusedOrOpen",
+                "url": "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cbcf913da34646e030b115;nroActoAdministrativo=312300000054;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;archivoAdjuntoActuadoId=64cbcf913da34646e030b113;cantidadLecturas=0;fechaEnvioNotificacion=2023-08-03T12:02:25.836;estadoNotificacionElectronicaId=1461"
+            },
+    */
 
     webpush.sendNotification(
         pushSubscription,
