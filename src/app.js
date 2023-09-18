@@ -5,10 +5,23 @@ const { Server } = require("socket.io");      // Importacion de socket.io
 const { Console, log } = require("console");       // Importacion para mostrar mensajes en consola 
 const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo 
                                               // Es un mecanismo basado en las cabeceras HTTP que permite a un servidor indicar que cualquier dominio esquema o puerto
-    //  Importacion  KAFKA consumidor 
+
+
+
+//  Importacion  PULSAR consumidor 
+const pulsar = require('pulsar-client');
+
+const serviceUrl = 'pulsar://10.1.17.35:6650,10.1.17.36:6650,10.1.17.37:6650';
+const tenant = 'desarrollo';
+const namespace = 'sad_not';
+const topicPulsar = 'notificacion';
+
+
+
+//  Importacion  KAFKA consumidor 
 const kafka = require('kafka-node');
 const Consumer = kafka.Consumer;
-const client = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
+const client = new kafka.KafkaClient({ kafkaHost: '10.1.36.38:9092' });
 const topic = 'notificaciones-web';
 const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
 
@@ -16,7 +29,7 @@ const consumer = new Consumer(client, [{ topic }], { autoCommit: false });
 // Kafka para Avisos
 
 const ConsumerAvisos = kafka.Consumer;
-const clientAvisos = new kafka.KafkaClient({ kafkaHost: '10.1.34.29:9092' });
+const clientAvisos = new kafka.KafkaClient({ kafkaHost: '10.1.36.38:9092' });
 const topicAvisos = 'avisos-push';
 const consumerAvisos = new ConsumerAvisos(clientAvisos, [{ topic: topicAvisos }], { autoCommit: false });
 
@@ -72,7 +85,72 @@ var XMLHttpRequest = require("xhr2");
 const xhr = new XMLHttpRequest();
 
 
+
+
+
+
+
 io.on("connection", socket => {
+
+    /* --------- ******* ---------  */
+    /* --------- PULSAR ----------  */
+    /* --------- ******* ---------  */
+
+
+    console.log('Nuevo cliente conectado.');
+
+
+    async function consumeMessages() {
+        const clientPulsar = new pulsar.Client({
+          serviceUrl,
+          operationTimeoutSeconds: 30,
+        });
+    
+        const consumer = await clientPulsar.subscribe({
+            topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
+            subscription: 'suscripcion', 
+            subscriptionType: "Exclusive",
+          });
+          
+    
+        console.log('Consumidor conectado.');
+    
+        try {
+          while (true) {
+            const message = await consumer.receive();
+            const messageText = message.getData().toString();
+            console.log(`Recibido mensaje: ${messageText}`);
+    
+            // Emitir el mensaje a través de Socket.IO
+            socket.emit('nuevo-mensaje-pulsar', messageText);
+    
+            consumer.acknowledge(message);
+          }
+        } catch (error) {
+          console.error(error);
+          clientPulsar.close();
+        }
+      }
+
+
+      socket.on('disconnect', () => {
+        console.log('Cliente desconectado.');
+      });
+    
+      // Iniciar la recepción de mensajes de Pulsar cuando un cliente se conecta
+      consumeMessages().catch((error) => {
+        console.error('Error en el consumidor:', error);
+      });
+
+
+    /* --------- ******* ---------  */
+    /* --------- PULSAR ----------  */
+    /* --------- ******* ---------  */
+
+
+
+
+    
     // TODO Envio de Notificacion Tanto para dispositivos WEB y MOBILE
     consumer.on('message', function (message) {
         console.log('Received message _ without value :', JSON.parse(message.value));    
