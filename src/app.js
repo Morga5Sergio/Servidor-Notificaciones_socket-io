@@ -1,9 +1,9 @@
 const express = require('express');           // Framework de nodeJs Express
 const path = require("path");                 // path 
 const { createServer } = require("http");     // Creacion de servidor
-const { Server } = require("socket.io");      // Importacion de socket.io
-const { Console, log } = require("console");       // Importacion para mostrar mensajes en consola 
-const cors = require('cors')                  // Cors para permitir el acceso a clientes , Que es el Intercambio de recursos de origen Cruzado, es un mecanismo                                               
+const { Server } = require("socket.io");      // Importacion de socket.io 
+const app = express(); // Se tiene guardado express con su propiedades y sus metodos
+const webpush = require('web-push'); // TODO Importaciones de WEB Push_ para WEB 
 
 //  Importacion  PULSAR consumidor 
 const pulsar = require('pulsar-client');
@@ -11,10 +11,7 @@ const serviceUrl = 'pulsar://10.1.17.35:6650,10.1.17.36:6650,10.1.17.37:6650';
 const tenant = 'desarrollo';
 const namespace = 'sad_not';
 const topicPulsar = 'notificacion';
-
-const app = express(); // Se tiene guardado express con su propiedades y sus metodos
-
-const webpush = require('web-push'); // TODO Importaciones de WEB Push_ para WEB 
+let suma = 0;
 const vapidKeys = {  // Llaves publicas y privadas 
     "publicKey":"BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg",
     "privateKey":"0giCCcZw9RhRoqoeO1Ejy2SsIFb6n4460Shf4oWk2Bc"
@@ -25,7 +22,7 @@ webpush.setVapidDetails(
     vapidKeys.privateKey
 );
 
-// Modelos
+// Modelos para los DTOS de notificaciones y avisos
 let mensajeNotificacionKafka = require('./models/mensaje_kafka');
 let mensaje_kafka_avisos = require('./models/mensaje_kafka_avisos');
 let responseToken = require('./models/token_model');
@@ -50,8 +47,28 @@ _connect(); // Realiza la conexion de la base de datos en MONGO.
 var XMLHttpRequest = require("xhr2");
 const xhr = new XMLHttpRequest();
 
-// TODO Solo pulsar 
+/** 
+ * @author Gary morga
+ * @description Implementación de socket para enviar datos 
+*/
 
+io.on("connection", socket => {
+    console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
+    //io.emit("registroBD", "Send_register_base_datos");  // TODO Solo el uso 
+        
+    socket.on('disconnect', () => {
+        console.log('Cliente desconectado.');
+        console.log("El cliente " + socket.id + " se ha desconectado ");
+    });                                                                                                                                                                         
+});
+
+function enviarMensajeNotificacionSocket(datosNit, envioPhone){
+    console.log(" Contador de entrada de Socket ==>   " +  suma);
+    suma = suma +1;
+    console.log("Envia Socket ==>===> " +  mensajeNotificacionKafka.nit + " fasfsda" + datosNit);
+    io.emit(datosNit, envioPhone);                                                                             
+}
+// TODO Solo pulsar 
 async function consumeMessages() {
     const clientPulsar = new pulsar.Client({
       serviceUrl,
@@ -68,28 +85,18 @@ async function consumeMessages() {
         try {
             console.log("Entra en pulsar ==> Gary try ==> " );
             while (true) {
-                const  message = await consumer.receive();
+                const  message = await consumer.receive();  // AvisosPush{"avisoPushId":
                 console.log(" Datos del mensaje PULSARRR ==>   "   + message.getData())
-                const messageText = message.getData().toString();
-                //const messageText =  JSON.parse(message.getData()); // message.getData().toString();
-                //const Prueba = JSON.parse(message.getData().toString());
+                const messageText = message.getData().toString();        
 
                 const startIndex = messageText.indexOf('NotificacionesPush');
                 const jsonString = messageText.substring(startIndex + 'NotificacionesPush'.length);
                 console.log(" Prfasd  =>  " + jsonString);
                 mensajeNotificacionKafka = JSON.parse(jsonString);
-                console.log(" Prfasd AAAAA =>  " + mensajeNotificacionKafka.nit);
+                console.log(" GaryDatos ==>  ", mensajeNotificacionKafka);
+                console.log(" Prfasd AAAAA =>  ", mensajeNotificacionKafka.nit);
             
-                // mensajeNotificacionKafka = message.getData().toString; 
-                //  console.log(`Recibido mensaje: ${messageText}`);
-                //  console.log(" NIT ==> "  + messageText.nit);
-                // Emitir el mensaje a través de Socket.IO
-                // console.log(" Notificaciones pruebas ======> " + Prueba);
-                
-                // GARY INICIO
-              /*   console.log( "                                                                                                                           " );
-                console.log(mensajeNotificacionKafka);
-                console.log(" NIT =>  " + mensajeNotificacionKafka.nit); */
+                    
             
                 const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensajeNotificacionKafka.nit;
                 console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
@@ -99,18 +106,11 @@ async function consumeMessages() {
         
                 const API_URL_TOKEN = "https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000";
                 getToken(API_URL_TOKEN)
-                    .then((responseTokenD) => {
-                        console.log("Respusta de Notificacion")
-                        // console.log("Respuesta:", response);
-                        // responseToken = JSON.parse(response);
-                        responseToken = JSON.parse(responseTokenD)
-                        console.log("Dato del Token Obtenido",  responseToken);                
-                        //token = response.token; 
+                    .then((responseTokenD) => {                        
+                        responseToken = JSON.parse(responseTokenD)            
                         const tokenRespuesta = responseToken.token;
-                        console.log(responseToken.token); 
-                        // Nombre del Dispositivo
-                        // Ahora se realiza la respues de los otros datos 
-                    makeHttpRequest(tokenRespuesta, API_URL_Lista_Usuario)
+                        usuarioTokenDtos = [];
+                    getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
                         .then((response) => {
                         console.log("Respuesta Final ")
                         console.log("Respuesta:", response);
@@ -120,12 +120,12 @@ async function consumeMessages() {
                         console.log(" Dato");
                         usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
                         console.log(usuarioTokenDtos);
-                        console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  ----- "  + usuarioTokenDtos.length );
+                        console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- "  + usuarioTokenDtos.length );
+                        console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- " ,  usuarioTokenDtos );
                         
                         //console.log("Tamaño del array ==> " + usuarioTokenDtos.length: + "  Datos_ Nombre del Dispositivo ==> " + usuarioTokenDtos[0].nombreDispositivo );
                         
-                        if(usuarioTokenDtos.length > 0){
-                            // console.log(element.webId);
+                        if(usuarioTokenDtos.length > 0){                            
                             envioPhone.arrayImei = [];
                             usuarioTokenDtos.forEach(element => {
                                 modeloNoti = element;
@@ -136,9 +136,10 @@ async function consumeMessages() {
                                     
                                 }
                             });
-                            usuarioTokenDtos.forEach(element => {
-                                modeloNoti = element;
-                                console.log("Datosfsdfds");
+
+                            console.log(" GaryMorgaNotificacion ==> ", envioPhone );
+                            usuarioTokenDtos.forEach(element => { // El  usuarioTokenDtos es la lista de dispositivos // Serian una 6 veces pero va a mandar 
+                                modeloNoti = element;                                
                                 console.log(modeloNoti);
                                 console.log("--- Noitiicasd --- ");
                                 console.log(modeloNoti.tokenPush);
@@ -150,31 +151,22 @@ async function consumeMessages() {
                                         envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeNotificacionKafka.cabecera, mensajeNotificacionKafka.cuerpo, "Ir a ver la notificación", "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones");
                                     }                    
                                 }else{
-                                    console.log("ENVIANDO NOTIFICACION PARA MOVIL"); // 2063982011                            
-
-                                    if(modeloNoti.tokenPush == "ACTIVO"){                        
-                                        envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion;                                                        
-                                        console.log(" nit ", mensajeNotificacionKafka.nit  , " ===> ");
-
-                                        io.on("connection", socket => {
-                                            console.log("Clientes conectados: ", io.engine.clientsCount , " id " + socket.id);
-                                            io.emit("registroBD", "Send_register_base_datos");  // TODO Solo el uso 
-
-                                            io.emit(mensajeNotificacionKafka.nit, envioPhone);                                                                             
-                                            console.log('Nuevo cliente conectado.');
-
-                                            socket.on('disconnect', () => {
-                                                console.log('Cliente desconectado.');
-                                            });
-                                                                                                                    
-                                            socket.on("disconnect", () => {
-                                                console.log("El cliente " + socket.id + " se ha desconectado ");
-                                            });                                                                                                                                                                  
-                                        });
-                                    }                                                                      
+                                    console.log("ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ", usuarioTokenDtos.length); // 2063982011     
+                                    // TODO Pruebas                        
+                                    if(modeloNoti.imei != ""){
+                                        console.log("Entra a IMEI ==> " + modeloNoti.imei + " ============> para enviar notificaciones <================")
+                                        if(modeloNoti.tokenPush == "ACTIVO"){                        
+                                            envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion;   
+                                            console.log(" GaryMorgaNotificacion Other ====> ", envioPhone.length + " Datos ==>  ", envioPhone );                                                     
+                                            console.log(" nit ", mensajeNotificacionKafka.nit  , " ===> ");
+                                            console.log("Envia Movil ===> " +  mensajeNotificacionKafka.nit);
+                                            const strNitImei = mensajeNotificacionKafka.nit + "-" + modeloNoti.imei;
+                                            enviarMensajeNotificacionSocket(strNitImei, envioPhone)
+                                        }
+                                    }                                                                                                          
                                 }
                             });
-                        }else {
+                        }else {                            
                             console.log(" No se han encontrado una lista de dispositivos en el NIT Correspondiente ");
                         }
                     }).catch((error) => {
@@ -183,13 +175,7 @@ async function consumeMessages() {
                 })
                     .catch((error) => {
                     console.error("Error Obtener Token==>:", error.message);
-                });
-            
-                // GARY FIN
-                // console.log('Received message _ without value :', JSON.parse(message));    
-                // mensajeNotificacionKafka = JSON.parse(message.value);                                    
-                //socket.emit('nuevo-mensaje-pulsar', messageText);
-                // Nuevo Socket conectado pulsar
+                });                
             consumer.acknowledge(message);
             }
     } catch (error) {
@@ -197,27 +183,23 @@ async function consumeMessages() {
       clientPulsar.close();
     }
   }
-
-  //consumeMessages();
-
+  /*
+    Función que obtiene los datos del pulsar consumidor
+  */
   consumeMessages().catch((error) => {
     console.error('Error en el consumidor:', error);
   });
-// END Fin Pulsar
 
-
-
-
-
-
-// INICIO DEL SERVIDOR
+// Inicia el servidor
 httpServer.listen(process.env.PORT , ()=> {
     console.log('Servidor a la espera de conexion ', process.env.PORT);
 })
 
 
-
-
+/**
+ * @author GaryMorga
+ * @description Esta funcion envia la notificacion con los datos de WEBPUSH 
+ */
 function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensajeVerAvisos, urlAvisosNotificaciones){
     console.log("EndPointWeb  ==>  " + endPointWeb );
     console.log("keyWeb ==> " + keyWeb );
@@ -230,7 +212,6 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
             p256dh: keyWeb
         }
     };
-
     const payload = {
         "notification": {
             "title": cabecera,
@@ -268,8 +249,10 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
         })
 }
 
-//app.route('/api/enviar').post(enviarNotificacion);  // Servicio Para enviar la notificacion
-// FUNCIONES PARA OBTENER LOS SERVECIOS
+/**
+ * @author GaryMorga
+ * @description Esta funcion obtiene el Token del servicio
+ */
 function getToken(pApiUrlToken){
     return new Promise((resolve, reject) => {
         const xhrToken = new XMLHttpRequest();
@@ -288,7 +271,11 @@ function getToken(pApiUrlToken){
     });    
 }
 
-function makeHttpRequest(token, pUrlRespuestaUsuario) {    
+/**
+ * @author GaryMorga
+ * @description Esta funcion obtiene el listado de usuarios del servicio
+ */
+function getListaDeUsuarioDispositivos(token, pUrlRespuestaUsuario) {    
     console.log("Entrando al MakeHttpRequest ==> " +  pUrlRespuestaUsuario);
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
