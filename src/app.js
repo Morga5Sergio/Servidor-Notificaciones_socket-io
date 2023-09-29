@@ -16,6 +16,7 @@ const vapidKeys = {  // Llaves publicas y privadas
     "publicKey":"BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg",
     "privateKey":"0giCCcZw9RhRoqoeO1Ejy2SsIFb6n4460Shf4oWk2Bc"
 }
+
 webpush.setVapidDetails(
     'mailto:example@yourdomain.org',
     vapidKeys.publicKey,
@@ -25,6 +26,7 @@ webpush.setVapidDetails(
 // Modelos para los DTOS de notificaciones y avisos
 let mensajeNotificacionKafka = require('./models/mensaje_kafka');
 let mensaje_kafka_avisos = require('./models/mensaje_kafka_avisos');
+let notificaciones_electronicas = require('./models/notificaciones_electronicas');
 let responseToken = require('./models/token_model');
 let listaDispositivos = require('./models/lista_dispositivos');
 let modeloNoti = require('./models/modelos_noti');
@@ -95,7 +97,9 @@ async function consumeMessages() {
                 mensajeNotificacionKafka = JSON.parse(jsonString);
                 console.log(" GaryDatos ==>  ", mensajeNotificacionKafka);
                 console.log(" Prfasd AAAAA =>  ", mensajeNotificacionKafka.nit);
-            
+                notificaciones_electronicas = mensajeNotificacionKafka.notificacionesElectronicas;
+                
+                let objEnvioNotificacion = {"idNotificacion": mensajeNotificacionKafka.idNotificacion,"actoadministrativo": notificaciones_electronicas.actoAdministrativo, "archivoAduntoId": notificaciones_electronicas.archivoAdjuntoActuadoId, "estadoId": mensajeNotificacionKafka.estadoId }
                     
             
                 const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensajeNotificacionKafka.nit;
@@ -109,7 +113,7 @@ async function consumeMessages() {
                     .then((responseTokenD) => {                        
                         responseToken = JSON.parse(responseTokenD)            
                         const tokenRespuesta = responseToken.token;
-                        usuarioTokenDtos = [];
+                        usuarioTokenDtos = [];  
                     getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
                         .then((response) => {
                         console.log("Respuesta Final ")
@@ -148,7 +152,9 @@ async function consumeMessages() {
                                     if(modeloNoti.tokenPush == "ACTIVO"){
                                         console.log("ENVIANDO NOTIFICAION PARA WEB");                                
                                         // Enviar mensaje idNOtificacion , mensajeNotificacionKafka.idNotificacion
-                                        envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeNotificacionKafka.cabecera, mensajeNotificacionKafka.cuerpo, "Ir a ver la notificación", "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones");
+                                        // mensajeNotificacionKafka.
+                                        envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeNotificacionKafka.cabecera, mensajeNotificacionKafka.cuerpo, "Ir a ver la notificación",  objEnvioNotificacion);
+                                        //envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeNotificacionKafka.cabecera, mensajeNotificacionKafka.cuerpo, "Ir a ver la notificación", "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones", objEnvioNotificacion);
                                     }                    
                                 }else{
                                     console.log("ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ", usuarioTokenDtos.length); // 2063982011     
@@ -200,10 +206,11 @@ httpServer.listen(process.env.PORT , ()=> {
  * @author GaryMorga
  * @description Esta funcion envia la notificacion con los datos de WEBPUSH 
  */
-function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensajeVerAvisos, urlAvisosNotificaciones){
+function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensajeVerAvisos, objEnvioNotificacion ){
     console.log("EndPointWeb  ==>  " + endPointWeb );
     console.log("keyWeb ==> " + keyWeb );
     console.log("authWeb ==> " + authWeb );
+    console.log("objEnvioNotificacion ====> " ,  objEnvioNotificacion);
 
     const pushSubscription = {
         endpoint: endPointWeb, "expirationTime": null,
@@ -225,6 +232,21 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
                 },
             ],
             "data": {
+                "dato": objEnvioNotificacion,
+                "onActionClick": {                    
+                    "reply": {
+                        "operation": "navigateLastFocusedOrOpen",
+                        "url": "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones"                   
+                    }
+                }         
+            },
+        }
+    }
+    /* "data": {
+        dato: idNotificacion          
+    }, */
+
+   /*  "data": {
                 "onActionClick": {                    
                     "reply": {
                         "operation": "navigateLastFocusedOrOpen",
@@ -233,11 +255,6 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
                         //"url": "http://localhost:4200/con/notificaciones/"
                     }
                 }
-            },
-        }
-    }
-    /* "data": {
-        dato: idNotificacion          
     }, */
     webpush.sendNotification(
         pushSubscription,

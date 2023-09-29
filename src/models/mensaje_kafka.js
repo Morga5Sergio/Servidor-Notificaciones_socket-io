@@ -14,6 +14,7 @@ let mensajeNotificacionKafka = {
    ,origen:""
    ,cantidadLectura:0
    ,nit:""
+   ,notificacionesElectronicas: {}
 }
 
 module.exports = mensajeNotificacionKafka;
