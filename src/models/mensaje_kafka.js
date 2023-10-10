@@ -4,7 +4,7 @@ let mensajeNotificacionKafka = {
    ,usuarioUltimaModificacionId:0
    ,fechaRegistro:0
    ,fechaUltimaModificacion:0
-   ,estadoId:""
+   ,estadoNotificacion:""
    ,notificacionPushId:""
    ,idNotificacion:""
    ,cabecera:""

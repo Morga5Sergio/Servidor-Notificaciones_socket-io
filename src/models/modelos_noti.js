@@ -1,12 +1,11 @@
 let modeloNoti = {
     nombreDispositivo: '',
-    estadoTokenId: 0,
-    tokenPush: "",
+    estadoDispositivoId: 0,
+    descripcionEstado: "",
     imei: "", 
     webId: "",
     endPointWeb: '',
     keyWeb: '',
     authWeb: ''
 }
-
 module.exports = modeloNoti;

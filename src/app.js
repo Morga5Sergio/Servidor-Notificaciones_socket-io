@@ -98,8 +98,7 @@ async function consumeMessages() {
                         const  message = await consumer.receive();  // AvisosPush{"avisoPushId":
                         console.log(" Datos del mensaje PULSARRR ==>   "   + message.getData())
                         const messageText = message.getData().toString();        
-                        console.log(" El mensaje de datos de mensajeriaSER Notificacion Original ===>  " , messageText );
-        
+                        console.log(" El mensaje de datos de mensajeriaSER Notificacion Original ===>  " , messageText );        
         
                         const startIndex = messageText.indexOf('NotificacionesPush');
                         
@@ -111,10 +110,10 @@ async function consumeMessages() {
                         console.log(" Prfasd AAAAA =>  ", mensajeNotificacionKafka.nit);
                         notificaciones_electronicas = mensajeNotificacionKafka.notificacionesElectronicas;
                         
-                        let objEnvioNotificacion = {"idNotificacion": mensajeNotificacionKafka.idNotificacion,"actoadministrativo": notificaciones_electronicas.actoAdministrativo, "archivoAduntoId": notificaciones_electronicas.archivoAdjuntoActuadoId, "estadoId": mensajeNotificacionKafka.estadoId }
+                        let objEnvioNotificacion = {"idNotificacion": mensajeNotificacionKafka.idNotificacion,"actoadministrativo": notificaciones_electronicas.actoAdministrativo, "archivoAduntoId": notificaciones_electronicas.archivoAdjuntoActuadoId, "estadoId": mensajeNotificacionKafka.estadoNotificacion }
                             
                     
-                        const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensajeNotificacionKafka.nit;
+                        const API_URL_Lista_Usuario = "http://localhost:39559/api/dispositivo/buscarXNit/"+mensajeNotificacionKafka.nit;
                         console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
                         console.log(API_URL_Lista_Usuario);
         
@@ -134,7 +133,7 @@ async function consumeMessages() {
                                 console.log("  ---------------------- Prueba de respuesta FINAL ------------------------------ "); 
                                 console.log(listaDispositivos)
                                 console.log(" Dato");
-                                usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
+                                usuarioTokenDtos = listaDispositivos.dispositivos;
                                 console.log(usuarioTokenDtos);
                                 console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- "  + usuarioTokenDtos.length );
                                 console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- " ,  usuarioTokenDtos );
@@ -161,7 +160,7 @@ async function consumeMessages() {
                                         console.log(modeloNoti.tokenPush);
                                         if(modeloNoti.webId != ""){
                                             //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
-                                            if(modeloNoti.tokenPush == "ACTIVO"){
+                                            if(modeloNoti.descripcionEstado  == "ACTIVO"){
                                                 console.log("ENVIANDO NOTIFICAION PARA WEB");                                
                                                 // Enviar mensaje idNOtificacion , mensajeNotificacionKafka.idNotificacion
                                                 // mensajeNotificacionKafka.
@@ -193,7 +192,7 @@ async function consumeMessages() {
                         })
                             .catch((error) => {
                             console.error("Error Obtener Token==>:", error.message);
-                        });              
+                        });          
                     consumer.acknowledge(message);
                     }
             } catch (error) {
@@ -241,7 +240,7 @@ async function consumeMessagesPulsarAvisos() {
 
               let objAvisos = {"idAviso": mensaje_pulsar_avisos.idAviso, "archivoPdf": avisosPulsar.archivoPdf};
                       
-              const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensaje_pulsar_avisos.nit;
+              const API_URL_Lista_Usuario = "http://localhost:39559/api/dispositivo/buscarXNit/"+mensaje_pulsar_avisos.nit;
               console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
               console.log(API_URL_Lista_Usuario);
 
@@ -363,7 +362,7 @@ async function consumeMessagesMensajeria() {
                 console.log(" GaryDatos ==>  ", mensajeriaPulsar);                
                 console.log(" Mensajeria_de_control =>  ", mensajeriaPulsar.nit);
                                             
-                const API_URL_Lista_Usuario = "http://localhost:39476/api/listadoUsuarios/"+mensajeriaPulsar.nit;
+                const API_URL_Lista_Usuario = "http://localhost:39559/api/dispositivo/buscarXNit/"+mensajeriaPulsar.nit;
                 console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
                 console.log(API_URL_Lista_Usuario);
                         
@@ -479,8 +478,7 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
         urlPDF = `http://localhost:4200/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`; 
         console.log("Url_PDF notificaciones =>  ", urlPDF )
     }else {
-        if(tipo === "avisos"){
-            // Son otros campos diferentes            
+        if(tipo === "avisos"){        
             urlPDF = `http://localhost:4200/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
             console.log("Url_PDF Avisos =>  ", urlPDF )
         }else {

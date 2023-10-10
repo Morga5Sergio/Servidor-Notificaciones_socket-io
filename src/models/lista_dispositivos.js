@@ -1,7 +1,7 @@
 let listaDispositivos = {
     transaccion: "",
     mensaje:[],
-    usuarioTokenDtos: []
+    dispositivos: []
     
 }
 module.exports = listaDispositivos;
