@@ -88,37 +88,18 @@ async function consumeMessages() {
         topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
         subscription: 'suscripcion_3', 
         subscriptionType: "Exclusive",
-      });    
-        // console.log('Consumidor conectado.');
-        console.log(" Entra en pulsar notificaciones ==> Gary " + topicPulsar);
+      });                
         if(topicPulsar === 'notificacion'){            
-                try {
-                    console.log("Entra en pulsar ==> Gary try ==> " );
+                try {                    
                     while (true) {
-                        const  message = await consumer.receive();  // AvisosPush{"avisoPushId":
-                        console.log(" Datos del mensaje PULSARRR ==>   "   + message.getData())
-                        const messageText = message.getData().toString();        
-                        console.log(" El mensaje de datos de mensajeriaSER Notificacion Original ===>  " , messageText );        
-        
-                        const startIndex = messageText.indexOf('NotificacionesPush');
-                        
-                        console.log(" Notificacion original ==>     " + startIndex );
-                        const jsonString = messageText.substring(startIndex + 'NotificacionesPush'.length);
-                        console.log(" Prfasd  =>  " + jsonString);
-                        mensajeNotificacionKafka = JSON.parse(jsonString);
-                        console.log(" GaryDatos ==>  ", mensajeNotificacionKafka);
-                        console.log(" Prfasd AAAAA =>  ", mensajeNotificacionKafka.nit);
-                        notificaciones_electronicas = mensajeNotificacionKafka.notificacionesElectronicas;
-                        
-                        let objEnvioNotificacion = {"idNotificacion": mensajeNotificacionKafka.idNotificacion,"actoadministrativo": notificaciones_electronicas.actoAdministrativo, "archivoAduntoId": notificaciones_electronicas.archivoAdjuntoActuadoId, "estadoId": mensajeNotificacionKafka.estadoNotificacion }
-                            
-                    
-                        const API_URL_Lista_Usuario = "http://localhost:39559/api/dispositivo/buscarXNit/"+mensajeNotificacionKafka.nit;
-                        console.log(" URL Lista De Usuario entrando al CONSUMER ==>  ");
-                        console.log(API_URL_Lista_Usuario);
-        
-                        // De aqui obtengo el NIT Correspondiente para las notificaciones.
-                
+                        const  message = await consumer.receive();  // AvisosPush{"avisoPushId":                        
+                        const messageText = message.getData().toString();                                
+                        const startIndex = messageText.indexOf('NotificacionesPush');                                                
+                        const jsonString = messageText.substring(startIndex + 'NotificacionesPush'.length);                        
+                        mensajeNotificacionKafka = JSON.parse(jsonString);                        
+                        notificaciones_electronicas = mensajeNotificacionKafka.notificacionesElectronicas;                        
+                        let objEnvioNotificacion = {"idNotificacion": mensajeNotificacionKafka.idNotificacion,"actoadministrativo": notificaciones_electronicas.actoAdministrativo, "archivoAduntoId": notificaciones_electronicas.archivoAdjuntoActuadoId, "estadoId": mensajeNotificacionKafka.estadoNotificacion }                                                
+                        const API_URL_Lista_Usuario = "http://localhost:39559/api/dispositivo/buscarXNit/"+mensajeNotificacionKafka.nit;                                                                        
                         const API_URL_TOKEN = "https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000";
                         getToken(API_URL_TOKEN)
                             .then((responseTokenD) => {                        
@@ -218,11 +199,8 @@ async function consumeMessagesPulsarAvisos() {
         topic: `persistent://${tenant}/${namespace}/${topicPulsarAvisos}`,
         subscription: 'suscripcion_3', 
         subscriptionType: "Exclusive",
-      });    
-      console.log("Entra en pulsar ==> Gary ");
-
-      try {
-          console.log("Entra en pulsar ==> Gary try ==> " );
+      });          
+      try {          
           while (true) {
               const  message = await consumer.receive();  // AvisosPush{"avisoPushId":
               console.log(" Datos del mensaje de avisos ==>   "   + message.getData())
@@ -260,7 +238,7 @@ async function consumeMessagesPulsarAvisos() {
                       console.log("  ---------------------- Prueba de respuesta FINAL ------------------------------ "); 
                       console.log(listaDispositivos)
                       console.log(" Dato");
-                      usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
+                      usuarioTokenDtos = listaDispositivos.dispositivos
                       console.log(usuarioTokenDtos);
                       console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- "  + usuarioTokenDtos.length );
                       console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- " ,  usuarioTokenDtos );
@@ -272,7 +250,7 @@ async function consumeMessagesPulsarAvisos() {
                           usuarioTokenDtos.forEach(element => {
                               modeloNoti = element;
                               if(modeloNoti.imei != "" ){
-                                  if(modeloNoti.tokenPush == "ACTIVO"){
+                                  if(modeloNoti.descripcionEstado == "ACTIVO"){
                                       envioPhoneAvisos.arrayImei.push(modeloNoti.imei);
                                   }
                                   
@@ -284,21 +262,21 @@ async function consumeMessagesPulsarAvisos() {
                               modeloNoti = element;                                
                               console.log(modeloNoti);
                               console.log("--- Noitiicasd --- ");
-                              console.log(modeloNoti.tokenPush);
+                              console.log(modeloNoti.descripcionEstado);
                               if(modeloNoti.webId != ""){
                                   //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
-                                  if(modeloNoti.tokenPush == "ACTIVO"){
+                                  if(modeloNoti.descripcionEstado == "ACTIVO"){
                                       console.log("ENVIANDO NOTIFICAION PARA WEB");                                
                                       // Enviar mensaje idNOtificacion , mensaje_pulsar_avisos.idNotificacion
                                       // mensaje_pulsar_avisos.
-                                      envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, "Ir a ver la notificación", objAvisos, "avisos");
+                                      envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, "Ir a ver el Aviso", objAvisos, "avisos");
                                       //envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, "Ir a ver la notificación", "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones", objEnvioNotificacion);
                                   }                    
                               }else{
                                   // console.log("ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ", usuarioTokenDtos.length); // 2063982011                                     
                                   if(modeloNoti.imei != ""){
                                       console.log("Entra a IMEI ==> " + modeloNoti.imei + " ============> para enviar notificaciones <================")
-                                      if(modeloNoti.tokenPush == "ACTIVO"){                        
+                                      if(modeloNoti.descripcionEstado == "ACTIVO"){                        
                                           envioPhoneAvisos.idAvisos = mensaje_pulsar_avisos.idAviso;   
                                           console.log(" GaryMorgaNotificacion Other ====> ", envioPhoneAvisos.length + " Datos ==>  ", envioPhoneAvisos );                                                     
                                           console.log(" nit ", mensaje_pulsar_avisos.nit  , " ===> ");
@@ -380,7 +358,7 @@ async function consumeMessagesMensajeria() {
                         console.log("  ---------------------- Prueba de respuesta FINAL ------------------------------ "); 
                         console.log(listaDispositivos)
                         console.log(" Dato");
-                        usuarioTokenDtos = listaDispositivos.usuarioTokenDtos
+                        usuarioTokenDtos = listaDispositivos.dispositivos
                         console.log(usuarioTokenDtos);
                         console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- "  + usuarioTokenDtos.length );
                         console.log("  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- " ,  usuarioTokenDtos );
@@ -392,7 +370,7 @@ async function consumeMessagesMensajeria() {
                             usuarioTokenDtos.forEach(element => {
                                 modeloNoti = element;
                                 if(modeloNoti.imei != "" ){
-                                    if(modeloNoti.tokenPush == "ACTIVO"){
+                                    if(modeloNoti.descripcionEstado == "ACTIVO"){
                                         envioPhone.arrayImei.push(modeloNoti.imei);
                                     }
                                     
@@ -404,14 +382,14 @@ async function consumeMessagesMensajeria() {
                                 modeloNoti = element;                                
                                 console.log(modeloNoti);
                                 console.log("--- Noitiicasd --- ");
-                                console.log(modeloNoti.tokenPush);
+                                console.log(modeloNoti.descripcionEstado);
                                 if(modeloNoti.webId != ""){
                                     //envioNotificacion(element.endPointWeb, element.keyWeb, element.authWeb);
-                                    if(modeloNoti.tokenPush == "ACTIVO"){
-                                        console.log("ENVIANDO NOTIFICAION PARA WEB");                                
+                                    if(modeloNoti.descripcionEstado == "ACTIVO"){
+                                        console.log("ENVIANDO Mensajeria PARA WEB");                                
                                         // Enviar mensaje idNOtificacion , mensajeriaPulsar.idNotificacion
                                         // mensajeriaPulsar.
-                                        envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, "Ir a ver la notificación",  {} , "mensajeria");
+                                        envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, "Ir a mensajeria",  {} , "mensajeria");
                                         //envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb,modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, "Ir a ver la notificación", "https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones", objEnvioNotificacion);
                                     }                    
                                 }else{
@@ -482,7 +460,7 @@ function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensa
             urlPDF = `http://localhost:4200/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
             console.log("Url_PDF Avisos =>  ", urlPDF )
         }else {
-            urlPDF = "Url que solo redirecciona al listado de mensajes "
+            urlPDF = "http://localhost:4200/con/mensajeria"
         }
     }
     
