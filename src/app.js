@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-let usuarioTokenDtos = []
+let arrDispositivos = []
 
 const _connect = require('./dbConnection/connection')
 _connect()
@@ -62,7 +62,7 @@ io.on('connection', socket => {
   })
 })
 
-// ? ***************************** Metodo consumeMessages *****************
+// ? ***************************** Metodo consumeMessages Notificaciones *****************
 async function consumeMessages() {
   const clientPulsar = new pulsar.Client({
     serviceUrl,
@@ -91,35 +91,30 @@ async function consumeMessages() {
           estadoId: mensajeNotificacionKafka.estadoNotificacion
         }
 
-        const API_URL_Lista_Usuario =
-          'http://localhost:39559/api/dispositivo/buscarXNit/' + mensajeNotificacionKafka.nit
+        const API_URL_Lista_Usuario = 'http://localhost:39559/api/dispositivo/buscarXNit/' + mensajeNotificacionKafka.nit
         const API_URL_TOKEN = 'https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000'
 
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
           responseToken = JSON.parse(responseTokenD)
           const tokenRespuesta = responseToken.token
-          usuarioTokenDtos = []
+          arrDispositivos = []
 
           try {
-            const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-            console.log('Respuesta Final ')
-            console.log('Respuesta:', response)
+            const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)        
+            console.log('Respuesta: FINAL', response)
 
             listaDispositivos = JSON.parse(response)
-            console.log('  ---------------------- Prueba de respuesta FINAL ------------------------------ ')
+            console.log('  ---------------------- Array Dispositivos ------------------------------ ')
             console.log(listaDispositivos)
             console.log(' Dato')
-            usuarioTokenDtos = listaDispositivos.dispositivos
-            console.log(usuarioTokenDtos)
-            console.log(
-              '  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- ' + usuarioTokenDtos.length
-            )
-            console.log('  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- ', usuarioTokenDtos)
+            arrDispositivos = listaDispositivos.dispositivos            
+            console.log('Longitud Array Dispositivos ===>  ' + arrDispositivos.length)
+            console.log(' Array Dispositivos ===>  ', arrDispositivos)
 
-            if (usuarioTokenDtos.length > 0) {
+            if (arrDispositivos.length > 0) {
               envioPhone.arrayImei = []
-              usuarioTokenDtos.forEach(element => {
+              arrDispositivos.forEach(element => {
                 modeloNoti = element
                 if (modeloNoti.imei != '' && modeloNoti.tokenPush === 'ACTIVO') {
                   envioPhone.arrayImei.push(modeloNoti.imei)
@@ -127,12 +122,12 @@ async function consumeMessages() {
               })
 
               console.log(' GaryMorgaNotificacion ==> ', envioPhone)
-              usuarioTokenDtos.forEach(element => {
+              arrDispositivos.forEach(element => {
                 modeloNoti = element
                 console.log(modeloNoti)
                 console.log('--- Noitiicasd --- ')
                 console.log(modeloNoti.tokenPush)
-                if (modeloNoti.webId != '') {
+                if (modeloNoti.webId != null) {
                   if (modeloNoti.descripcionEstado === 'ACTIVO') {
                     console.log('ENVIANDO NOTIFICACION PARA WEB')
                     envioNotificacion(
@@ -147,7 +142,7 @@ async function consumeMessages() {
                     )
                   }
                 } else {
-                  console.log('ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ', usuarioTokenDtos.length)
+                  console.log('ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ', arrDispositivos.length)
                   if (modeloNoti.imei != '' && modeloNoti.tokenPush === 'ACTIVO') {
                     console.log(
                       'Entra a IMEI ==> ' +
@@ -224,7 +219,7 @@ async function consumeMessagesPulsarAvisos() {
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
-      usuarioTokenDtos = []
+      arrDispositivos = []
 
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
       console.log('Respuesta Final ')
@@ -234,16 +229,16 @@ async function consumeMessagesPulsarAvisos() {
       console.log('  ---------------------- Prueba de respuesta FINAL ------------------------------ ')
       console.log(listaDispositivos)
       console.log(' Dato')
-      usuarioTokenDtos = listaDispositivos.dispositivos
-      console.log(usuarioTokenDtos)
+      arrDispositivos = listaDispositivos.dispositivos
+      console.log(arrDispositivos)
       console.log(
-        '  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Longitud----- ' + usuarioTokenDtos.length
+        '  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Longitud----- ' + arrDispositivos.length
       )
-      console.log('  ----- usuarioTºokenDtos usuarioTokenDtos usuarioTokenDtos  Datos----- ', usuarioTokenDtos)
+      console.log('  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Datos----- ', arrDispositivos)
 
-      if (usuarioTokenDtos.length > 0) {
+      if (arrDispositivos.length > 0) {
         envioPhoneAvisos.arrayImei = []
-        usuarioTokenDtos.forEach(element => {
+        arrDispositivos.forEach(element => {
           modeloNoti = element
           if (modeloNoti.imei != '') {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
@@ -253,12 +248,12 @@ async function consumeMessagesPulsarAvisos() {
         })
 
         console.log(' GaryMorgaNotificacion ==> ', envioPhoneAvisos)
-        usuarioTokenDtos.forEach(element => {
+        arrDispositivos.forEach(element => {
           modeloNoti = element
           console.log(modeloNoti)
           console.log('--- Noitiicasd --- ')
           console.log(modeloNoti.descripcionEstado)
-          if (modeloNoti.webId != '') {
+          if (modeloNoti.webId != null) {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
               console.log('ENVIANDO NOTIFICAION PARA WEB')
               envioNotificacion(
@@ -444,16 +439,16 @@ async function consumeMessagesMensajeria() {
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
-      usuarioTokenDtos = []
+      arrDispositivos = []
 
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
 
       listaDispositivos = JSON.parse(response)
-      usuarioTokenDtos = listaDispositivos.dispositivos
+      arrDispositivos = listaDispositivos.dispositivos
 
-      if (usuarioTokenDtos.length > 0) {
+      if (arrDispositivos.length > 0) {
         envioPhone.arrayImei = []
-        usuarioTokenDtos.forEach(element => {
+        arrDispositivos.forEach(element => {
           modeloNoti = element
           if (modeloNoti.imei != '') {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
@@ -462,9 +457,9 @@ async function consumeMessagesMensajeria() {
           }
         })
 
-        usuarioTokenDtos.forEach(element => {
+        arrDispositivos.forEach(element => {
           modeloNoti = element
-          if (modeloNoti.webId != '') {
+          if (modeloNoti.webId != null) {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
               envioNotificacion(
                 modeloNoti.endPointWeb,
