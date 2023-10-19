@@ -217,7 +217,7 @@ async function consumeMessagesPulsarAvisos() {
       console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ')
       console.log(API_URL_Lista_Usuario)
 
-      const API_URL_TOKEN = 'https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000'
+      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
@@ -329,13 +329,13 @@ function envioNotificacion(
   let urlPDF = ''
 
   if (tipo === 'notificacion') {
-    urlPDF = `http://localhost:4200/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
     console.log('Url_PDF notificaciones =>  ', urlPDF)
   } else if (tipo === 'avisos') {
-    urlPDF = `http://localhost:4200/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
     console.log('Url_PDF Avisos =>  ', urlPDF)
   } else {
-    urlPDF = 'http://localhost:4200/con/mensajeria'
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/mensajeria`
   }
 
   const pushSubscription = {
@@ -435,7 +435,7 @@ async function consumeMessagesMensajeria() {
 
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
-      const API_URL_TOKEN = 'https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000'
+      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
