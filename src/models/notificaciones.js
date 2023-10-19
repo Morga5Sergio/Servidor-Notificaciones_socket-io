@@ -1,8 +1,3 @@
-// "http://localhost:4200/notificacionespdf;notificacionElectronicaId=64cd5aea7c2ed93cde80813d;nroActoAdministrativo=312300000054
-//;actoAdministrativo=AUTO%20INICIAL%20DE%20SUMARIO%20CONTRAVENCIONAL;fechaActoAdministrativo=2023-08-01T11:27:05.209;
-// archivoAdjuntoActuadoId=64cd5aea7c2ed93cde80813b;
-// cantidadLecturas=0;fechaEnvioNotificacion=2023-08-04T16:09:14.830;estadoNotificacionElectronicaId=1461"
-
 let notificacionesModel = { 
     otificacionElectronicaId:"64cd5aea7c2ed93cde80813d"
     ,nroActoAdministrativo:312300000054
@@ -47,48 +42,3 @@ let notificacionesModel = {
 
 
 module.exports = notificacionesModel;
-
-
-
-/*let notificacionesModel = { 
-    "notificacionElectronicaId":""
-    ,"nroActoAdministrativo":""
-    ,"cadenaCiteActuado":""
-    ,"actoAdministrativo":""
-    ,"tipoActoAdministrativo":""
-    ,"fechaActoAdministrativo":""
-    ,"personaContribuyenteId":""
-    ,"archivoAdjuntoActuadoId":""
-    ,"archivoAdjuntoActuado":""
-    ,"archivoAdjuntoConstanciaId":""
-    ,"numeroFojas":""
-    ,"cantidadLecturas":""
-    ,"fechaEnvioNotificacion":""
-    ,"fechaNotificacion":""
-    ,"fechaNotificacionS":""
-    ,"usuarioNotificadorId":""
-    ,"codigoAdminGenera":""
-    ,"codigoDptoGenera":""
-    ,"estadoNotificacionElectronicaId":""
-    ,"gerenciaEmisora":""
-    ,"autoridadCompetente":""
-    ,"cargoAutoridad":""
-    ,"ciContribuyente":""
-    ,"ciUsuario":""
-    ,"lugarExpedicionContribuyente":""
-    ,"lugarExpedicionUsuario":""
-    ,"razonSocial":""
-    ,"nit":""
-    ,"usuarioNotificador":""
-    ,"fechaLectura":""
-    ,"fechaPrenotificacion":""
-    ,"fechaVisualizacion":""
-    ,"tipoContribuyente":""
-    ,"tipoDocumentoContribuyente":""
-    ,"adminNotifica":""
-    ,"actividadLista":""
-    ,"representanteLegalLista":""
-    ,"representates":""
-    ,"fechaVencimiento":""
-    ,"descripcionDptoGenera":""}*/
-    

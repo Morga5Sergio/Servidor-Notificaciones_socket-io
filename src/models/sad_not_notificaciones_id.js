@@ -1,7 +1,5 @@
 const mongoose = require('mongoose').Types.ObjectId;
 const query = { campaign_id: new ObjectId(campaign._id) };
-// const { Schema } = mongoose
-
 /*
     @author:  Gary_Morga
     @description:  Modelo de base datos sad_not_notificaciones, se realiza el modelaje de la coleccion 
@@ -48,11 +46,5 @@ const SadNotNotificacionesSchema = new Schema({
 });
 
 const SadNotNotificacionesModel = mongoose.model('sad_not_notificaciones', SadNotNotificacionesSchema);
-
-/*String.prototype.toObjectId = function() {
-    var ObjectId = (require('mongoose').Types.ObjectId);
-    return new ObjectId(this.toString());
-  };*/
-
 module.exports = SadNotNotificacionesModel;
 
