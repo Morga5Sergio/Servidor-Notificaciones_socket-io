@@ -8,6 +8,7 @@ const { Server } = require('socket.io')
 const app = express()
 const webpush = require('web-push')
 const pulsar = require('pulsar-client')
+const config = require('../src/config')
 
 const serviceUrl = 'pulsar://10.1.17.35:6650,10.1.17.36:6650,10.1.17.37:6650'
 const tenant = 'desarrollo'
@@ -19,8 +20,8 @@ const topicPulsarMensajeria = 'mensajeria'
 const namespacePulsarAvisos = ''
 
 const vapidKeys = {
-  publicKey: 'BKbDv1DiuvXSl4Tz6jYTklivIxYjRRaJUgVjWaP4lAm8XSiZe8UjWBxxF-dMjZIl04svkre6Hina-nNNlryBvKg',
-  privateKey: '0giCCcZw9RhRoqoeO1Ejy2SsIFb6n4460Shf4oWk2Bc'
+  publicKey: config.PUBLIC_KEY,
+  privateKey: config.PRIVATE_KEY
 }
 
 webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, vapidKeys.privateKey)
@@ -91,8 +92,9 @@ async function consumeMessages() {
           estadoId: mensajeNotificacionKafka.estadoNotificacion
         }
 
-        const API_URL_Lista_Usuario = 'http://localhost:39559/api/dispositivo/buscarXNit/' + mensajeNotificacionKafka.nit
-        const API_URL_TOKEN = 'https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000'
+        const API_URL_Lista_Usuario =
+          `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionKafka.nit
+        const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
 
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
@@ -101,14 +103,14 @@ async function consumeMessages() {
           arrDispositivos = []
 
           try {
-            const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)        
+            const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
             console.log('Respuesta: FINAL', response)
 
             listaDispositivos = JSON.parse(response)
             console.log('  ---------------------- Array Dispositivos ------------------------------ ')
             console.log(listaDispositivos)
             console.log(' Dato')
-            arrDispositivos = listaDispositivos.dispositivos            
+            arrDispositivos = listaDispositivos.dispositivos
             console.log('Longitud Array Dispositivos ===>  ' + arrDispositivos.length)
             console.log(' Array Dispositivos ===>  ', arrDispositivos)
 
@@ -211,7 +213,7 @@ async function consumeMessagesPulsarAvisos() {
 
       let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
 
-      const API_URL_Lista_Usuario = 'http://localhost:39559/api/dispositivo/buscarXNit/' + mensaje_pulsar_avisos.nit
+      const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
       console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ')
       console.log(API_URL_Lista_Usuario)
 
@@ -231,9 +233,7 @@ async function consumeMessagesPulsarAvisos() {
       console.log(' Dato')
       arrDispositivos = listaDispositivos.dispositivos
       console.log(arrDispositivos)
-      console.log(
-        '  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Longitud----- ' + arrDispositivos.length
-      )
+      console.log('  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Longitud----- ' + arrDispositivos.length)
       console.log('  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Datos----- ', arrDispositivos)
 
       if (arrDispositivos.length > 0) {
@@ -304,7 +304,7 @@ consumeMessagesPulsarAvisos().catch(error => {
 
 // ! esta es la llamada al servidor
 httpServer.listen(process.env.PORT, () => {
-  console.log('Servidor a la espera de conexion ', process.env.PORT)
+  console.log('Servidor a la espera de conexion ', config.PORT)
 })
 
 // ? ***************************** Metodo consumeMessagesMensajeria *****************
@@ -433,7 +433,7 @@ async function consumeMessagesMensajeria() {
       const jsonString = messageText.substring(startIndex + 'MensajeriaPush'.length)
       mensajeriaPulsar = JSON.parse(jsonString)
 
-      const API_URL_Lista_Usuario = `http://localhost:39559/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
+      const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
       const API_URL_TOKEN = 'https://desasiatservicios.impuestos.gob.bo/str-cau-caut-rest/token/getGenerico/1000'
       const responseTokenD = await getToken(API_URL_TOKEN)
