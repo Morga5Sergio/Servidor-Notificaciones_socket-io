@@ -145,12 +145,8 @@ async function consumeMessages() {
                   }
                 } else {
                   console.log('ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ', arrDispositivos.length)
-                  if (modeloNoti.imei != '' && modeloNoti.tokenPush === 'ACTIVO') {
-                    console.log(
-                      'Entra a IMEI ==> ' +
-                        modeloNoti.imei +
-                        ' ============> para enviar notificaciones <================'
-                    )
+                  if (modeloNoti.imei != '' && modeloNoti.descripcionEstado === 'ACTIVO') {
+                    console.log('Entra a IMEI ==> ' + modeloNoti.imei +  ' ============> para enviar notificaciones <================')
                     envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion
                     console.log(' nit ', mensajeNotificacionKafka.nit, ' ===> ')
                     console.log('Envia Movil ===> ' + mensajeNotificacionKafka.nit)
