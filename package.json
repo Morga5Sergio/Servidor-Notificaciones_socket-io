@@ -4,9 +4,9 @@
   "description": "Servidor Socket.io",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/app.js",
-    "start": "node src/app.js"
+    "dev": "nodemon ./src/app.js --exec babel-node",
+    "build": "babel src -d dist && ncp src/views dist/views && ncp src/public dist/public",
+    "start": "node ./dist/app.js"
   },
   "author": "GaryMorga",
   "license": "ISC",
@@ -28,6 +28,12 @@
   "devDependencies": {
     "bufferutil": "^4.0.7",
     "nodemon": "^2.0.22",
-    "utf-8-validate": "^5.0.10"
+    "utf-8-validate": "^5.0.10",
+    "@babel/cli": "^7.16.7",
+    "@babel/core": "^7.16.7",
+    "@babel/node": "^7.16.7",
+    "@babel/plugin-transform-runtime": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
+    "ncp": "^2.0.0"
   }
 }
