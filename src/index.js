@@ -1,4 +1,7 @@
+import indexRoutes from './routes/test.routes'
+import uniqueRandomNumberWithText from './util/uuid.util'
 require('dotenv').config()
+console.log('uniqueRandomNumberWithText =============>', uniqueRandomNumberWithText)
 
 const { Client } = require('pulsar-client')
 const express = require('express')
@@ -72,7 +75,7 @@ async function consumeMessages() {
 
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
-    subscription: 'test_one',
+    subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Exclusive'
   })
 
@@ -191,7 +194,7 @@ async function consumeMessagesPulsarAvisos() {
 
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsarAvisos}`,
-    subscription: 'suscripcion_3',
+    subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Exclusive'
   })
 
@@ -420,7 +423,7 @@ async function consumeMessagesMensajeria() {
 
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespacePulsarMensajeria}/${topicPulsarMensajeria}`,
-    subscription: 'suscripcion_3',
+    subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Exclusive'
   })
 
@@ -498,7 +501,6 @@ consumeMessagesMensajeria().catch(error => {
   console.error('Error en el consumidor mensajeria:', error)
 })
 
-import indexRoutes from './routes/test.routes'
 // const indexRoutes = require('./routes/test.routes')
 // routes
 app.use(indexRoutes)
