@@ -13,23 +13,24 @@ const webpush = require('web-push')
 const pulsar = require('pulsar-client')
 const config = require('../src/config')
 
-const serviceUrl = 'pulsar://10.1.17.35:6650,10.1.17.36:6650,10.1.17.37:6650'
-const tenant = 'desarrollo'
+const serviceUrl = config.PULSAR_BROKERS;
+const tenant = config.PULSAR_TENANT;
 const namespace = 'sad_not'
 const topicPulsarAvisos = 'aviso'
 const topicPulsar = 'notificacion'
 const namespacePulsarMensajeria = 'sad_men'
 const topicPulsarMensajeria = 'mensajeria'
-const namespacePulsarAvisos = ''
 
 const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
   privateKey: config.PRIVATE_KEY
 }
+/* console.log("Variables de entorno ==> " , process.env)
+console.log(" ==> "+config.PUBLIC_KEY ); */
 
 webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, vapidKeys.privateKey)
 
-let mensajeNotificacionKafka = require('./models/mensaje_kafka')
+let mensajeNotificacionPulsar = require('./models/mensaje_notificacion_pulsar')
 let mensajeriaPulsar = require('./models/mensaje_pulsar')
 let mensaje_pulsar_avisos = require('./models/mensaje_pulsar_avisos')
 let avisosPulsar = require('./models/avisos')
@@ -40,12 +41,13 @@ let modeloNoti = require('./models/modelos_noti')
 
 let envioPhone = { idNotificacion: '', arrayImei: [], tipo: 'notificacion' }
 let envioPhoneAvisos = { idAvisos: '', arrayImei: [], tipo: 'avisos' }
-
 const httpServer = createServer(app)
-const io = new Server(httpServer, { cors: { origin: '*' } })
+try {
 
-app.use(express.static(path.join(__dirname, 'views')))
-app.get('/', (req, res) => {
+  const io = new Server(httpServer, { cors: { origin: '*' } })
+
+  app.use(express.static(path.join(__dirname, 'views')))
+  app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
@@ -53,7 +55,6 @@ let arrDispositivos = []
 
 const _connect = require('./dbConnection/connection')
 _connect()
-
 var XMLHttpRequest = require('xhr2')
 const xhr = new XMLHttpRequest()
 
@@ -64,7 +65,19 @@ io.on('connection', socket => {
     console.log('Cliente desconectado.')
     console.log('El cliente ' + socket.id + ' se ha desconectado ')
   })
-})
+})  
+ // * MEJORADO ------------> util
+
+}
+catch (error) {
+  console.log(" ERROR " , error);
+}
+
+function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
+  console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
+  io.emit(datosNit, envioPhone)
+}
+
 
 // ? ***************************** Metodo consumeMessages Notificaciones *****************
 async function consumeMessages() {
@@ -86,17 +99,17 @@ async function consumeMessages() {
         const messageText = message.getData().toString()
         const startIndex = messageText.indexOf('NotificacionesPush')
         const jsonString = messageText.substring(startIndex + 'NotificacionesPush'.length)
-        mensajeNotificacionKafka = JSON.parse(jsonString)
-        notificaciones_electronicas = mensajeNotificacionKafka.notificacionesElectronicas
+        mensajeNotificacionPulsar = JSON.parse(jsonString)
+        notificaciones_electronicas = mensajeNotificacionPulsar.notificacionesElectronicas
         let objEnvioNotificacion = {
-          idNotificacion: mensajeNotificacionKafka.idNotificacion,
+          idNotificacion: mensajeNotificacionPulsar.idNotificacion,
           actoadministrativo: notificaciones_electronicas.actoAdministrativo,
           archivoAduntoId: notificaciones_electronicas.archivoAdjuntoActuadoId,
-          estadoId: mensajeNotificacionKafka.estadoNotificacion
+          estadoId: mensajeNotificacionPulsar.estadoNotificacion
         }
 
         const API_URL_Lista_Usuario =
-          `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionKafka.nit
+          `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
         const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
 
         try {
@@ -139,8 +152,8 @@ async function consumeMessages() {
                       modeloNoti.endPointWeb,
                       modeloNoti.keyWeb,
                       modeloNoti.authWeb,
-                      mensajeNotificacionKafka.cabecera,
-                      mensajeNotificacionKafka.cuerpo,
+                      mensajeNotificacionPulsar.cabecera,
+                      mensajeNotificacionPulsar.cuerpo,
                       'Ir a ver la notificación',
                       objEnvioNotificacion,
                       'notificacion'
@@ -154,10 +167,10 @@ async function consumeMessages() {
                         modeloNoti.imei +
                         ' ============> para enviar notificaciones <================'
                     )
-                    envioPhone.idNotificacion = mensajeNotificacionKafka.idNotificacion
-                    console.log(' nit ', mensajeNotificacionKafka.nit, ' ===> ')
-                    console.log('Envia Movil ===> ' + mensajeNotificacionKafka.nit)
-                    const strNitImei = mensajeNotificacionKafka.nit + '-' + modeloNoti.imei
+                    envioPhone.idNotificacion = mensajeNotificacionPulsar.idNotificacion
+                    console.log(' nit ', mensajeNotificacionPulsar.nit, ' ===> ')
+                    console.log('Envia Movil ===> ' + mensajeNotificacionPulsar.nit)
+                    const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
                     enviarMensajeNotificacionSocket(strNitImei, envioPhone)
                   }
                 }
@@ -180,7 +193,7 @@ async function consumeMessages() {
   }
 }
 
-// * MEJORADO
+// 
 consumeMessages().catch(error => {
   console.error('Error en el consumidor:', error)
 })
@@ -312,11 +325,7 @@ httpServer.listen(process.env.PORT, () => {
 
 // ? ***************************** Metodo consumeMessagesMensajeria *****************
 
-// * MEJORADO ------------> util
-function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
-  console.log('Envia Socket ==>===> ' + mensajeNotificacionKafka.nit + ' fasfsda' + datosNit)
-  io.emit(datosNit, envioPhone)
-}
+
 
 // * MEJORADO ------------> util
 function envioNotificacion(
