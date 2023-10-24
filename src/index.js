@@ -42,7 +42,8 @@ let modeloNoti = require('./models/modelos_noti')
 let envioPhone = { idNotificacion: '', arrayImei: [], tipo: 'notificacion' }
 let envioPhoneAvisos = { idAvisos: '', arrayImei: [], tipo: 'avisos' }
 const httpServer = createServer(app)
-try {
+
+let arrDispositivos = []
 
   const io = new Server(httpServer, { cors: { origin: '*' } })
 
@@ -51,7 +52,6 @@ try {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-let arrDispositivos = []
 
 const _connect = require('./dbConnection/connection')
 _connect()
@@ -66,13 +66,7 @@ io.on('connection', socket => {
     console.log('El cliente ' + socket.id + ' se ha desconectado ')
   })
 })  
- // * MEJORADO ------------> util
-
-}
-catch (error) {
-  console.log(" ERROR " , error);
-}
-
+ // * Notificaciones Socket 
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
   io.emit(datosNit, envioPhone)
@@ -108,10 +102,9 @@ async function consumeMessages() {
           estadoId: mensajeNotificacionPulsar.estadoNotificacion
         }
 
-        const API_URL_Lista_Usuario =
-          `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
+        const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
         const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
-
+        console.log("TOKEN Generico ==> " + API_URL_TOKEN );
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
           responseToken = JSON.parse(responseTokenD)
@@ -341,13 +334,17 @@ function envioNotificacion(
   let urlPDF = ''
 
   if (tipo === 'notificacion') {
-    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
     console.log('Url_PDF notificaciones =>  ', urlPDF)
   } else if (tipo === 'avisos') {
-    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
+    urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
+    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
     console.log('Url_PDF Avisos =>  ', urlPDF)
   } else {
-    urlPDF = `${config.URL_WEB_NOTIFICACION}/con/mensajeria`
+    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/mensajeria`
+    urlPDF = 'https://desasiat.impuestos.gob.bo/notificaciones/con/mensajeria'
+    console.log("Ruta ==> " , urlPDF);
   }
 
   const pushSubscription = {
