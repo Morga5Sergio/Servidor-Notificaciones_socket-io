@@ -1,3 +1,4 @@
+import { Console, log } from 'console'
 import indexRoutes from './routes/test.routes'
 import uniqueRandomNumberWithText from './util/uuid.util'
 require('dotenv').config()
@@ -20,7 +21,7 @@ const topicPulsarAvisos = 'aviso'
 const topicPulsar = 'notificacion'
 const namespacePulsarMensajeria = 'sad_men'
 const topicPulsarMensajeria = 'mensajeria'
-
+const os = require('os');
 const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
   privateKey: config.PRIVATE_KEY
@@ -58,12 +59,28 @@ _connect()
 var XMLHttpRequest = require('xhr2')
 const xhr = new XMLHttpRequest()
 
+console.log(" Socket ==> ConneccionTiemOut " , io._connectTimeout   );
+console.log(" Socket ==> _nsps " , io._nsps   );
+console.log(" Socket ==> _opts " , io._opts   );
+console.log(" Socket ==> _parser " , io._parser.PacketType.CONNECT_ERROR );
+
+console.log(" ================================================================ ");
+console.log(" environment ==> ",  config);
+// console.log(" Socket ==> ConneccionTiemOut " , io.   );
 io.on('connection', socket => {
   console.log('Clientes conectados: ', io.engine.clientsCount, ' id ' + socket.id)
 
   socket.on('disconnect', () => {
     console.log('Cliente desconectado.')
     console.log('El cliente ' + socket.id + ' se ha desconectado ')
+  })
+
+  socket.on('error', err => {
+    console.log("Error de conexión ", err.message);
+  });
+
+  socket.on("pulsar",  msaPulsar => {
+    console.log(" Mensaje entrante==>  ", msaPulsar );
   })
 })  
  // * Notificaciones Socket 
@@ -80,12 +97,14 @@ async function consumeMessages() {
     operationTimeoutSeconds: 30
   })
 
+  console.log(" clientPulsar==> " , clientPulsar );
+
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
     subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Exclusive'
   })
-
+  console.log(" Consumidor pulsar  " , consumer ); 
   if (topicPulsar === 'notificacion') {
     try {
       while (true) {
@@ -180,7 +199,7 @@ async function consumeMessages() {
         consumer.acknowledge(message)
       }
     } catch (error) {
-      console.error(error)
+      console.error( "Error al ",  error  + " Error cliente pulsar ");
       clientPulsar.close()
     }
   }
@@ -311,9 +330,16 @@ consumeMessagesPulsarAvisos().catch(error => {
   console.error('Error en el consumidor mensajeria _ pulsar:', error)
 })
 
+const networkInterfaces = os.networkInterfaces();
+console.log( " Direccion IP ==> " , networkInterfaces)
+// const ipAddress = networkInterfaces['eth0'][0].address; // Puedes reemplazar 'eth0' con el nombre de tu interfaz de red
+
+//console.log('La dirección IP actual es:', ipAddress);
+
 // ! esta es la llamada al servidor
 httpServer.listen(process.env.PORT, () => {
   console.log('Servidor a la espera de conexion ', config.PORT)
+  
 })
 
 // ? ***************************** Metodo consumeMessagesMensajeria *****************
