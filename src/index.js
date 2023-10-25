@@ -86,7 +86,12 @@ io.on('connection', socket => {
  // * Notificaciones Socket 
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
-  io.emit(datosNit, envioPhone)
+  try {
+    io.emit(datosNit, envioPhone)  
+  } catch (error) {
+    console.log( "erro => io emit ", error );
+  }
+  
 }
 
 
@@ -252,7 +257,7 @@ async function consumeMessagesPulsarAvisos() {
       arrDispositivos = []
 
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-      console.log('Respuesta Final ')
+      console.log('Respuesta Fincket.emal ')
       console.log('Respuesta:', response)
 
       listaDispositivos = JSON.parse(response)
