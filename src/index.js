@@ -40,23 +40,20 @@ let responseToken = require('./models/token_model')
 let listaDispositivos = require('./models/lista_dispositivos')
 let modeloNoti = require('./models/modelos_noti')
 
-let envioPhone = { idNotificacion: '', arrayImei: [], tipo: 'notificacion' }
-let envioPhoneAvisos = { idAvisos: '', arrayImei: [], tipo: 'avisos' }
+let envioPhoneNotificacion = { idNotificacion: '', tipo: 'notificacion' }
+let envioPhoneAvisos = { idAvisos: '', tipo: 'avisos' }
+let envioPhoneMensajeria = { idAvisos: '', tipo: 'mensajeria' }
+
 const httpServer = createServer(app)
 
 let arrDispositivos = []
 
-  const io = new Server(httpServer, 
-    { 
-      cors: { origin: '*' } ,
-      path: "/sad-socket-test"
-    }
-  )
-
+  const io = new Server(httpServer, { cors: { origin: ['https://desasiatservicios.impuestos.gob.bo/sad-socket-test', '*']}})
+  // const io = new Server(httpServer, { cors: { origin: '*' } ,path: "/sad-socket-test"})
   app.use(express.static(path.join(__dirname, 'views')))
   app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/views/index.html')
-})
+    res.sendFile(__dirname + '/views/index.html')
+  })
 
 
 const _connect = require('./dbConnection/connection')
@@ -152,16 +149,7 @@ async function consumeMessages() {
             console.log('Longitud Array Dispositivos ===>  ' + arrDispositivos.length)
             console.log(' Array Dispositivos ===>  ', arrDispositivos)
 
-            if (arrDispositivos.length > 0) {
-              envioPhone.arrayImei = []
-              arrDispositivos.forEach(element => {
-                modeloNoti = element
-                if (modeloNoti.imei != '' && modeloNoti.tokenPush === 'ACTIVO') {
-                  envioPhone.arrayImei.push(modeloNoti.imei)
-                }
-              })
-
-              console.log(' GaryMorgaNotificacion ==> ', envioPhone)
+            if (arrDispositivos.length > 0) {                    
               arrDispositivos.forEach(element => {
                 modeloNoti = element
                 console.log(modeloNoti)
@@ -181,19 +169,14 @@ async function consumeMessages() {
                       'notificacion'
                     )
                   }
-                } else {
-                  console.log('ENVIANDO NOTIFICACION PARA MOVIL_ tamaño=> ', arrDispositivos.length)
+                } else {                  
                   if (modeloNoti.imei != '' && modeloNoti.descripcionEstado === 'ACTIVO') {
-                    console.log(
-                      'Entra a IMEI ==> ' +
-                        modeloNoti.imei +
-                        ' ============> para enviar notificaciones <================'
-                    )
-                    envioPhone.idNotificacion = mensajeNotificacionPulsar.idNotificacion
-                    console.log(' nit ', mensajeNotificacionPulsar.nit, ' ===> ')
-                    console.log('Envia Movil ===> ' + mensajeNotificacionPulsar.nit)
+                    console.log('ENVIANDO NOTIFICACION PARA MOVIL_ IMEI=> ', modeloNoti.imei , " Nombre del dispositivos==> " , modeloNoti.nombreDispositivo  );                    
+                    envioPhoneNotificacion.idNotificacion = mensajeNotificacionPulsar.idNotificacion                    
                     const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
-                    enviarMensajeNotificacionSocket(strNitImei, envioPhone)
+                    console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit)
+                    console.log(" Envio_Socket_datos =>  ",  envioPhoneNotificacion);
+                    enviarMensajeNotificacionSocket(strNitImei, envioPhoneNotificacion)
                   }
                 }
               })
@@ -274,18 +257,7 @@ async function consumeMessagesPulsarAvisos() {
       console.log('  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Longitud----- ' + arrDispositivos.length)
       console.log('  ----- usuarioTºokenDtos arrDispositivos arrDispositivos  Datos----- ', arrDispositivos)
 
-      if (arrDispositivos.length > 0) {
-        envioPhoneAvisos.arrayImei = []
-        arrDispositivos.forEach(element => {
-          modeloNoti = element
-          if (modeloNoti.imei != '') {
-            if (modeloNoti.descripcionEstado == 'ACTIVO') {
-              envioPhoneAvisos.arrayImei.push(modeloNoti.imei)
-            }
-          }
-        })
-
-        console.log(' GaryMorgaNotificacion ==> ', envioPhoneAvisos)
+      if (arrDispositivos.length > 0) {            
         arrDispositivos.forEach(element => {
           modeloNoti = element
           console.log(modeloNoti)
@@ -307,16 +279,10 @@ async function consumeMessagesPulsarAvisos() {
             }
           } else {
             if (modeloNoti.imei != '') {
-              console.log(
-                'Entra a IMEI ==> ' + modeloNoti.imei + ' ============> para enviar notificaciones <================'
-              )
+              console.log('Entra a IMEI ==> ' + modeloNoti.imei + ' ============> para enviar notificaciones <================');
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneAvisos.idAvisos = mensaje_pulsar_avisos.idAviso
-                console.log(
-                  ' GaryMorgaNotificacion Other ====> ',
-                  envioPhoneAvisos.length + ' Datos ==>  ',
-                  envioPhoneAvisos
-                )
+                console.log(' GaryMorgaNotificacion Other ====> ',envioPhoneAvisos.length + ' Datos ==>  ',envioPhoneAvisos)
                 console.log(' nit ', mensaje_pulsar_avisos.nit, ' ===> ')
                 console.log('Envia Movil ===> ' + mensaje_pulsar_avisos.nit)
                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
