@@ -22,6 +22,7 @@ const topicPulsar = 'notificacion'
 const namespacePulsarMensajeria = 'sad_men'
 const topicPulsarMensajeria = 'mensajeria'
 const os = require('os');
+const cors = require('cors');
 const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
   privateKey: config.PRIVATE_KEY
@@ -40,10 +41,11 @@ let responseToken = require('./models/token_model')
 let listaDispositivos = require('./models/lista_dispositivos')
 let modeloNoti = require('./models/modelos_noti')
 
-let envioPhoneNotificacion = { idNotificacion: '', tipo: 'notificacion' }
-let envioPhoneAvisos = { idAvisos: '', tipo: 'avisos' }
+let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion' }
+let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos' }
 let envioPhoneMensajeria = { idAvisos: '', tipo: 'mensajeria' }
 
+app.use(cors());
 const httpServer = createServer(app)
 
 let arrDispositivos = []
@@ -281,7 +283,7 @@ async function consumeMessagesPulsarAvisos() {
             if (modeloNoti.imei != '') {
               console.log('Entra a IMEI ==> ' + modeloNoti.imei + ' ============> para enviar notificaciones <================');
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                envioPhoneAvisos.idAvisos = mensaje_pulsar_avisos.idAviso
+                envioPhoneAvisos.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
                 console.log(' GaryMorgaNotificacion Other ====> ',envioPhoneAvisos.length + ' Datos ==>  ',envioPhoneAvisos)
                 console.log(' nit ', mensaje_pulsar_avisos.nit, ' ===> ')
                 console.log('Envia Movil ===> ' + mensaje_pulsar_avisos.nit)
@@ -313,6 +315,7 @@ console.log( " Direccion IP ==> " , networkInterfaces)
 //console.log('La dirección IP actual es:', ipAddress);
 
 // ! esta es la llamada al servidor
+
 httpServer.listen(process.env.PORT, () => {
   console.log('Servidor a la espera de conexion ', config.PORT)
   
