@@ -46,7 +46,12 @@ const httpServer = createServer(app)
 
 let arrDispositivos = []
 
-  const io = new Server(httpServer, { cors: { origin: '*' } })
+  const io = new Server(httpServer, 
+    { 
+      cors: { origin: '*' } ,
+      path: "/sad-socket-test"
+    }
+  )
 
   app.use(express.static(path.join(__dirname, 'views')))
   app.get('/', (req, res) => {
