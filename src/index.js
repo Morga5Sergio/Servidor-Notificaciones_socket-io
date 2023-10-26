@@ -45,12 +45,17 @@ let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion' }
 let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos' }
 let envioPhoneMensajeria = { idAvisos: '', tipo: 'mensajeria' }
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
+  methods: ['GET', 'POST']
+}));
 const httpServer = createServer(app)
 
 let arrDispositivos = []
 
-  const io = new Server(httpServer, { cors: { origin: ['https://desasiatservicios.impuestos.gob.bo/sad-socket-test', '*']}})
+  const io = new Server(httpServer, { 
+    cors: { origin: ['https://desasiatservicios.impuestos.gob.bo/sad-socket-test', '*']}
+  })
   // const io = new Server(httpServer, { cors: { origin: '*' } ,path: "/sad-socket-test"})
   app.use(express.static(path.join(__dirname, 'views')))
   app.get('/', (req, res) => {
@@ -92,7 +97,7 @@ function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
   try {
     io.emit(datosNit, envioPhone)  
-  } catch (error) {
+  } catch (error) {http://10.1.5.62:32002/
     console.log( "erro => io emit ", error );
   }
   
