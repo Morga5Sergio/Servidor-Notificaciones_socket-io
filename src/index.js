@@ -1,6 +1,7 @@
 import { Console, log } from 'console'
 import indexRoutes from './routes/test.routes'
 import uniqueRandomNumberWithText from './util/uuid.util'
+import { DefaultDeserializer } from 'v8'
 require('dotenv').config()
 console.log('uniqueRandomNumberWithText =============>', uniqueRandomNumberWithText)
 
@@ -43,7 +44,7 @@ let modeloNoti = require('./models/modelos_noti')
 
 let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion' }
 let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos' }
-let envioPhoneMensajeria = { idAvisos: '', tipo: 'mensajeria' }
+let envioPhoneMensajeria = { 'idNotificacion': '', tipo: 'mensajeria' }
 
 app.use(cors({
   origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
@@ -97,7 +98,7 @@ function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
   try {
     io.emit(datosNit, envioPhone)  
-  } catch (error) {http://10.1.5.62:32002/
+  } catch (error) {
     console.log( "erro => io emit ", error );
   }
   
@@ -430,7 +431,7 @@ function getToken(pApiUrlToken) {
   return makeHttpRequest('GET', pApiUrlToken)
 }
 
-// * MEJORADO
+// Notificaciones de mensajeria push
 async function consumeMessagesMensajeria() {
   const clientPulsar = new Client({
     serviceUrl,
@@ -451,7 +452,7 @@ async function consumeMessagesMensajeria() {
       const startIndex = messageText.indexOf('MensajeriaPush')
       const jsonString = messageText.substring(startIndex + 'MensajeriaPush'.length)
       mensajeriaPulsar = JSON.parse(jsonString)
-
+      console.log("MensajeriaMorga", " ==>  " ,  mensajeriaPulsar);
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
@@ -465,17 +466,7 @@ async function consumeMessagesMensajeria() {
       listaDispositivos = JSON.parse(response)
       arrDispositivos = listaDispositivos.dispositivos
 
-      if (arrDispositivos.length > 0) {
-        envioPhone.arrayImei = []
-        arrDispositivos.forEach(element => {
-          modeloNoti = element
-          if (modeloNoti.imei != '') {
-            if (modeloNoti.descripcionEstado == 'ACTIVO') {
-              envioPhone.arrayImei.push(modeloNoti.imei)
-            }
-          }
-        })
-
+      if (arrDispositivos.length > 0) {      
         arrDispositivos.forEach(element => {
           modeloNoti = element
           if (modeloNoti.webId != null) {
@@ -494,7 +485,7 @@ async function consumeMessagesMensajeria() {
           } else {
             if (modeloNoti.imei != '') {
               if (modeloNoti.tokenPush == 'ACTIVO') {
-                envioPhone.idNotificacion = mensajeriaPulsar.idNotificacion
+                envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
                 const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
                 enviarMensajeNotificacionSocket(strNitImei, envioPhone)
               }
