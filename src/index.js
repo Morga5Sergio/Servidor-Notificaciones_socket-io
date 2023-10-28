@@ -44,7 +44,7 @@ let modeloNoti = require('./models/modelos_noti')
 
 let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion' }
 let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos' }
-let envioPhoneMensajeria = { 'idNotificacion': '', tipo: 'mensajeria' }
+let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': 'mensajeria' }
 
 app.use(cors({
   origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
@@ -69,14 +69,7 @@ _connect()
 var XMLHttpRequest = require('xhr2')
 const xhr = new XMLHttpRequest()
 
-console.log(" Socket ==> ConneccionTiemOut " , io._connectTimeout   );
-console.log(" Socket ==> _nsps " , io._nsps   );
-console.log(" Socket ==> _opts " , io._opts   );
-console.log(" Socket ==> _parser " , io._parser.PacketType.CONNECT_ERROR );
-
-console.log(" ================================================================ ");
-console.log(" environment ==> ",  config);
-// console.log(" Socket ==> ConneccionTiemOut " , io.   );
+console.log(" Variables de configuración en environment ==> ",  config);
 io.on('connection', socket => {
   console.log('Clientes conectados: ', io.engine.clientsCount, ' id ' + socket.id)
 
@@ -137,7 +130,8 @@ async function consumeMessages() {
         }
 
         const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
-        const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
+        const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
+        
         console.log("TOKEN Generico ==> " + API_URL_TOKEN );
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
@@ -246,7 +240,7 @@ async function consumeMessagesPulsarAvisos() {
       console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ')
       console.log(API_URL_Lista_Usuario)
 
-      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
+      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
@@ -314,8 +308,8 @@ consumeMessagesPulsarAvisos().catch(error => {
   console.error('Error en el consumidor mensajeria _ pulsar:', error)
 })
 
-const networkInterfaces = os.networkInterfaces();
-console.log( " Direccion IP ==> " , networkInterfaces)
+/* const networkInterfaces = os.networkInterfaces();
+console.log( " Direccion IP ==> " , networkInterfaces) */
 // const ipAddress = networkInterfaces['eth0'][0].address; // Puedes reemplazar 'eth0' con el nombre de tu interfaz de red
 
 //console.log('La dirección IP actual es:', ipAddress);
@@ -345,16 +339,16 @@ function envioNotificacion(
   let urlPDF = ''
 
   if (tipo === 'notificacion') {
-    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
-    urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    //urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
     console.log('Url_PDF notificaciones =>  ', urlPDF)
   } else if (tipo === 'avisos') {
-    urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
-    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`
+    // urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`    
     console.log('Url_PDF Avisos =>  ', urlPDF)
   } else {
-    // urlPDF = `${config.URL_WEB_NOTIFICACION}/con/mensajeria`
-    urlPDF = 'https://desasiat.impuestos.gob.bo/notificaciones/con/mensajeria'
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria`
+    // urlPDF = 'https://desasiat.impuestos.gob.bo/notificaciones/con/mensajeria'
     console.log("Ruta ==> " , urlPDF);
   }
 
@@ -455,7 +449,7 @@ async function consumeMessagesMensajeria() {
       console.log("MensajeriaMorga", " ==>  " ,  mensajeriaPulsar);
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
-      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/str-cau-caut-rest/token/getGenerico/1000`
+      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
       const tokenRespuesta = responseToken.token
@@ -465,29 +459,21 @@ async function consumeMessagesMensajeria() {
 
       listaDispositivos = JSON.parse(response)
       arrDispositivos = listaDispositivos.dispositivos
-
+      console.log("Envio mensajeria push arrDispositivos => ", arrDispositivos );
       if (arrDispositivos.length > 0) {      
         arrDispositivos.forEach(element => {
           modeloNoti = element
           if (modeloNoti.webId != null) {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
-              envioNotificacion(
-                modeloNoti.endPointWeb,
-                modeloNoti.keyWeb,
-                modeloNoti.authWeb,
-                mensajeriaPulsar.cabecera,
-                mensajeriaPulsar.cuerpo,
-                'Ir a mensajeria',
-                {},
-                'mensajeria'
-              )
+              envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeriaPulsar.cabecera,mensajeriaPulsar.cuerpo,'Ir a mensajeria',{},'mensajeria')
             }
           } else {
             if (modeloNoti.imei != '') {
-              if (modeloNoti.tokenPush == 'ACTIVO') {
+              if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
                 const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-                enviarMensajeNotificacionSocket(strNitImei, envioPhone)
+                console.log("Envio mensajeria push => ", envioPhoneMensajeria , " Mensajeria Push ==> " , strNitImei );
+                enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
               }
             }
           }
