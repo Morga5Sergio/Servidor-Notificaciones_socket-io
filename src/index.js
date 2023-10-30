@@ -14,7 +14,6 @@ const app = express()
 const webpush = require('web-push')
 const pulsar = require('pulsar-client')
 const config = require('../src/config')
-
 const serviceUrl = config.PULSAR_BROKERS;
 const tenant = config.PULSAR_TENANT;
 const namespace = 'sad_not'
@@ -28,8 +27,6 @@ const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
   privateKey: config.PRIVATE_KEY
 }
-/* console.log("Variables de entorno ==> " , process.env)
-console.log(" ==> "+config.PUBLIC_KEY ); */
 
 webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, vapidKeys.privateKey)
 
@@ -120,6 +117,9 @@ async function consumeMessages() {
         const messageText = message.getData().toString()
         const startIndex = messageText.indexOf('NotificacionesPush')
         const jsonString = messageText.substring(startIndex + 'NotificacionesPush'.length)
+
+        // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
+        await consumer.acknowledge(message); 
         mensajeNotificacionPulsar = JSON.parse(jsonString)
         notificaciones_electronicas = mensajeNotificacionPulsar.notificacionesElectronicas
         let objEnvioNotificacion = {
@@ -224,7 +224,9 @@ async function consumeMessagesPulsarAvisos() {
       console.log(' Datos del mensaje de avisos ==>   ' + message.getData())
       const messageText = message.getData().toString()
       console.log(' El mensaje de datos de mensajeriaSER Avisos Pulsar ', messageText)
-
+      
+      // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
+      await consumer.acknowledge(message);
       const startIndex = messageText.indexOf('AvisosPush')
       const jsonString = messageText.substring(startIndex + 'AvisosPush'.length)
       console.log(' Prfasd  =>  ' + jsonString)
@@ -445,6 +447,8 @@ async function consumeMessagesMensajeria() {
 
       const startIndex = messageText.indexOf('MensajeriaPush')
       const jsonString = messageText.substring(startIndex + 'MensajeriaPush'.length)
+      // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
+      await consumer.acknowledge(message);
       mensajeriaPulsar = JSON.parse(jsonString)
       console.log("MensajeriaMorga", " ==>  " ,  mensajeriaPulsar);
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
@@ -458,6 +462,7 @@ async function consumeMessagesMensajeria() {
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
 
       listaDispositivos = JSON.parse(response)
+      console.log("Array lista dispostivos ", listaDispositivos );
       arrDispositivos = listaDispositivos.dispositivos
       console.log("Envio mensajeria push arrDispositivos => ", arrDispositivos );
       if (arrDispositivos.length > 0) {      
