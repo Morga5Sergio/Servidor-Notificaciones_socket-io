@@ -15,7 +15,7 @@ const webpush = require('web-push')
 const pulsar = require('pulsar-client')
 const config = require('../src/config')
 const serviceUrl = config.PULSAR_BROKERS;
-const tenant = config.PULSAR_TENANT;
+const tenant = 'local';
 const namespace = 'sad_not'
 const topicPulsarAvisos = 'aviso'
 const topicPulsar = 'notificacion'
@@ -192,6 +192,7 @@ async function consumeMessages() {
       }
     } catch (error) {
       console.error( "Error al ",  error  + " Error cliente pulsar ");
+      consumer.negativeAcknowledge(message)
       clientPulsar.close()
     }
   }
@@ -290,6 +291,7 @@ async function consumeMessagesPulsarAvisos() {
     }
   } catch (error) {
     console.error(error)
+    consumer.negativeAcknowledge(message)
     clientPulsar.close()
   }
 }
@@ -364,6 +366,7 @@ async function consumeMessagesMensajeria() {
     }
   } catch (error) {
     console.error(error)
+    consumer.negativeAcknowledge(message)
     clientPulsar.close()
   }
 }
