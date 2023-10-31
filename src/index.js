@@ -53,14 +53,12 @@ const httpServer = createServer(app)
 let arrDispositivos = []
 
   const io = new Server(httpServer, { 
-    cors: { origin: ['https://desasiatservicios.impuestos.gob.bo/sad-socket-test', '*']}
+    cors: { origin: ['*']}
   })
-  // const io = new Server(httpServer, { cors: { origin: '*' } ,path: "/sad-socket-test"})
   app.use(express.static(path.join(__dirname, 'views')))
   app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
   })
-
 
 const _connect = require('./dbConnection/connection')
 _connect()
@@ -84,17 +82,15 @@ io.on('connection', socket => {
     console.log(" Mensaje entrante==>  ", msaPulsar );
   })
 })  
- // * Notificaciones Socket 
+ // * Funcion que reenvia los msj de notificaciones al celular 
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
-  console.log('envio_datos_nit=> ' + datosNit + " Datos envio Socket  " + envioPhone);
+  console.log('Enviar al cel: nit + imael=> ' + datosNit + " Datos envio Socket  " + envioPhone);
   try {
     io.emit(datosNit, envioPhone)  
   } catch (error) {
     console.log( "erro => io emit ", error );
   }
-  
 }
-
 
 // ? ***************************** Metodo consumeMessages Notificaciones *****************
 async function consumeMessages() {
@@ -103,7 +99,7 @@ async function consumeMessages() {
     operationTimeoutSeconds: 30
   })
 
-  console.log(" clientPulsar==> " , clientPulsar );
+  console.log(" clientPulsar notificaciones ==> " , clientPulsar );
 
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
@@ -122,6 +118,7 @@ async function consumeMessages() {
         // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
         await consumer.acknowledge(message); 
         mensajeNotificacionPulsar = JSON.parse(jsonString)
+        console.log('mensajeNotificacionPulsar ==>', mensajeNotificacionPulsar)
         notificaciones_electronicas = mensajeNotificacionPulsar.notificacionesElectronicas
         let objEnvioNotificacion = {
           idNotificacion: mensajeNotificacionPulsar.idNotificacion,
@@ -133,7 +130,7 @@ async function consumeMessages() {
         const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
         const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
         
-        console.log("TOKEN Generico ==> " + API_URL_TOKEN );
+        console.log("API TOKEN Generico ==> " + API_URL_TOKEN );
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
           responseToken = JSON.parse(responseTokenD)
@@ -142,13 +139,12 @@ async function consumeMessages() {
 
           try {
             const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-            console.log('Respuesta: FINAL', response)
 
             listaDispositivos = JSON.parse(response)
-            console.log('  ---------------------- Array Dispositivos ------------------------------ ')
-            console.log(listaDispositivos)
-            console.log(' Dato')
+         
+            console.log('Repuesta del consumo del listado de dispositivos: ' + listaDispositivos)
             arrDispositivos = listaDispositivos.dispositivos
+            console.log('  ---------------------- Array Dispositivos ------------------------------ ')
             console.log('Longitud Array Dispositivos ===>  ' + arrDispositivos.length)
             console.log(' Array Dispositivos ===>  ', arrDispositivos)
 
@@ -222,26 +218,24 @@ async function consumeMessagesPulsarAvisos() {
   try {
     while (true) {
       const message = await consumer.receive()
-      console.log(' Datos del mensaje de avisos ==>   ' + message.getData())
+      console.log(' Datos del mensaje de Avisos ==>   ' + message.getData())
       const messageText = message.getData().toString()
-      console.log(' El mensaje de datos de mensajeriaSER Avisos Pulsar ', messageText)
+      console.log(' El mensaje de datos de mensajeria Avisos Pulsar ' + messageText)
       
       // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
       await consumer.acknowledge(message);
       const startIndex = messageText.indexOf('AvisosPush')
       const jsonString = messageText.substring(startIndex + 'AvisosPush'.length)
-      console.log(' Prfasd  =>  ' + jsonString)
+      console.log(' Data jsonString =>  ' + jsonString)
       mensaje_pulsar_avisos = JSON.parse(jsonString)
-      console.log(' GaryDatos ==>  ', mensaje_pulsar_avisos)
-      console.log(' Prfasd AAAAA =>  ', mensaje_pulsar_avisos.nit)
+      console.log('Mensaje pulsar avisos ==>  '+ mensaje_pulsar_avisos + 'mensaje_pulsar_avisos.nit' + mensaje_pulsar_avisos.nit)
       avisosPulsar = mensaje_pulsar_avisos.avisos
       console.log('Datos_prueba_control_solo_pulsar  => ', avisosPulsar)
 
       let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
 
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
-      console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ')
-      console.log(API_URL_Lista_Usuario)
+      console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
 
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
@@ -250,8 +244,7 @@ async function consumeMessagesPulsarAvisos() {
       arrDispositivos = []
 
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-      console.log('Respuesta Fincket.emal ')
-      console.log('Respuesta:', response)
+      console.log('Respuesta Fincket.emal ', response)
 
       listaDispositivos = JSON.parse(response)
       console.log('  ---------------------- Prueba de respuesta FINAL ------------------------------ ')
@@ -284,10 +277,10 @@ async function consumeMessagesPulsarAvisos() {
             }
           } else {
             if (modeloNoti.imei != '') {
-              console.log('Entra a IMEI ==> ' + modeloNoti.imei + ' ============> para enviar notificaciones <================');
+              console.log('Entra a IMEI ==> ' + modeloNoti.imei + ' ============> para enviar avisos <================');
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneAvisos.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
-                console.log(' GaryMorgaNotificacion Other ====> ',envioPhoneAvisos.length + ' Datos ==>  ',envioPhoneAvisos)
+                console.log('Notificacion Other ====> ',envioPhoneAvisos.length + ' Datos ==>  ',envioPhoneAvisos)
                 console.log(' nit ', mensaje_pulsar_avisos.nit, ' ===> ')
                 console.log('Envia Movil ===> ' + mensaje_pulsar_avisos.nit)
                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
@@ -334,7 +327,7 @@ async function consumeMessagesMensajeria() {
       // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
       await consumer.acknowledge(message);
       mensajeriaPulsar = JSON.parse(jsonString)
-      console.log("MensajeriaMorga", " ==>  " ,  mensajeriaPulsar);
+      console.log("Mensajeria Pulsar", " ==>  " ,  mensajeriaPulsar);
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
@@ -346,9 +339,9 @@ async function consumeMessagesMensajeria() {
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
 
       listaDispositivos = JSON.parse(response)
-      console.log("Array lista dispostivos ", listaDispositivos );
+      console.log("Array lista dispostivos mensajeria " + listaDispositivos );
       arrDispositivos = listaDispositivos.dispositivos
-      console.log("Envio mensajeria push arrDispositivos => ", arrDispositivos );
+      console.log("Envio mensajeria push arrDispositivos => "+ arrDispositivos );
       if (arrDispositivos.length > 0) {      
         arrDispositivos.forEach(element => {
           modeloNoti = element
