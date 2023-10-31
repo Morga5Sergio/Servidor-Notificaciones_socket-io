@@ -15,7 +15,7 @@ const webpush = require('web-push')
 const pulsar = require('pulsar-client')
 const config = require('../src/config')
 const serviceUrl = config.PULSAR_BROKERS;
-// const tenant = config.PULSAR_TENANT;
+//const tenant = config.PULSAR_TENANT;
 const tenant = 'local';
 const namespace = 'sad_not'
 const topicPulsarAvisos = 'aviso'
@@ -86,7 +86,7 @@ io.on('connection', socket => {
 })  
  // * Notificaciones Socket 
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
-  console.log('Envia Socket ==>===> ' + mensajeNotificacionPulsar.nit + ' fasfsda' + datosNit)
+  console.log('envio_datos_nit=> ' + datosNit + " Datos envio Socket  " + envioPhone);
   try {
     io.emit(datosNit, envioPhone)  
   } catch (error) {
@@ -184,7 +184,7 @@ async function consumeMessages() {
                 }
               })
             } else {
-              console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
+              console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente==> ' + mensajeNotificacionPulsar.nit);
             }
           } catch (error) {
             console.error('Error Final :', error.message)
