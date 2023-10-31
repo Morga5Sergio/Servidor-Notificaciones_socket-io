@@ -15,7 +15,8 @@ const webpush = require('web-push')
 const pulsar = require('pulsar-client')
 const config = require('../src/config')
 const serviceUrl = config.PULSAR_BROKERS;
-const tenant = config.PULSAR_TENANT;
+// const tenant = config.PULSAR_TENANT;
+const tenant = 'local';
 const namespace = 'sad_not'
 const topicPulsarAvisos = 'aviso'
 const topicPulsar = 'notificacion'
@@ -457,8 +458,7 @@ function envioNotificacion(
     }
   }
 
-  webpush
-    .sendNotification(pushSubscription, JSON.stringify(payload))
+  webpush.sendNotification(pushSubscription, JSON.stringify(payload))
     .then(res => {
       console.log('Enviado Mensaje !!')
     })
