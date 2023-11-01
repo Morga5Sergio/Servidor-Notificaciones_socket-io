@@ -173,7 +173,7 @@ async function consumeMessages() {
                     console.log('ENVIANDO NOTIFICACION PARA MOVIL_ IMEI=> ', modeloNoti.imei , " Nombre del dispositivos==> " , modeloNoti.nombreDispositivo  );                    
                     envioPhoneNotificacion.idNotificacion = mensajeNotificacionPulsar.idNotificacion                    
                     const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
-                    console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit)
+                    console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + " nombre del dispositivo " + modeloNoti.nombreDispositivo)
                     console.log(" Envio_Socket_datos =>  ",  envioPhoneNotificacion);
                     enviarMensajeNotificacionSocket(strNitImei, envioPhoneNotificacion)
                   }
@@ -276,8 +276,8 @@ async function consumeMessagesPulsarAvisos() {
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneAvisos.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
                 console.log(' avisos mensaje notificacion Datos ==>  ',envioPhoneAvisos)
-                console.log(' avisos nit ', mensaje_pulsar_avisos.nit, ' ===> ')
-                console.log(' mensaje_pulsar_avisos.nit ' + mensaje_pulsar_avisos.nit)
+                console.log(' avisos nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
+                console.log(' mensaje_pulsar_avisos.nit ' + mensaje_pulsar_avisos.nit )
                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
               }
@@ -351,9 +351,10 @@ async function consumeMessagesMensajeria() {
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
                 console.log(' MensajeriaPush mensaje notificacion Datos ==>  ',envioPhoneMensajeria)                
-                console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit)
+                console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
                 const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
                 console.log("Envio mensajeria push => ", envioPhoneMensajeria , " Mensajeria Push ==> " , strNitImei );
+                
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
               }
             }
