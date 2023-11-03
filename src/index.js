@@ -39,9 +39,9 @@ let responseToken = require('./models/token_model')
 let listaDispositivos = require('./models/lista_dispositivos')
 let modeloNoti = require('./models/modelos_noti')
 
-let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion' }
-let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos' }
-let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': 'mensajeria' }
+let envioPhoneNotificacion = { 'idNotificacion': '', 'tipo': 'notificacion','cabezera':'', 'cuerpo':'' }
+let envioPhoneAvisos = { 'idNotificacion': '', 'tipo': 'avisos', 'cabezera':'', 'cuerpo':'' }
+let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': 'mensajeria', 'cabezera':'', 'cuerpo':''}
 
 app.use(cors({
   origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
@@ -175,6 +175,11 @@ async function consumeMessages() {
                     const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
                     console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + " nombre del dispositivo " + modeloNoti.nombreDispositivo)
                     console.log(" Envio_Socket_datos =>  ",  envioPhoneNotificacion);
+                    console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeNotificacionPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeNotificacionPulsar.cuerpo);
+                    envioPhoneNotificacion.cabezera = mensajeNotificacionPulsar.cabecera;
+                    envioPhoneNotificacion.cuerpo = mensajeNotificacionPulsar.cuerpo;
+                    console.log(" envioPhoneNotificacion ==> " , envioPhoneNotificacion);
+                    enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
                     enviarMensajeNotificacionSocket(strNitImei, envioPhoneNotificacion)
                   }
                 }
@@ -279,6 +284,10 @@ async function consumeMessagesPulsarAvisos() {
                 console.log(' avisos nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
                 console.log(' mensaje_pulsar_avisos.nit ' + mensaje_pulsar_avisos.nit )
                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
+                console.log("Mensaje Mensajeria => Cabezera ==> " + mensaje_pulsar_avisos.cabecera + " Mensaje - Cuerpo  ==> " + mensaje_pulsar_avisos.cuerpo);
+                envioPhoneAvisos.cabezera = mensaje_pulsar_avisos.cabecera;
+                envioPhoneAvisos.cuerpo = mensaje_pulsar_avisos.cuerpo;
+                console.log(" envioPhoneAvisos ==> " , envioPhoneAvisos);
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
               }
             }
@@ -354,7 +363,10 @@ async function consumeMessagesMensajeria() {
                 console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
                 const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
                 console.log("Envio mensajeria push => ", envioPhoneMensajeria , " Mensajeria Push ==> " , strNitImei );
-                
+                console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
+                envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
+                envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
+                console.log(" envioPhoneMensajeria ==> " , envioPhoneMensajeria);
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
               }
             }
