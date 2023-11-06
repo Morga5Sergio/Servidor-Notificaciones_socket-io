@@ -74,16 +74,16 @@ io.on('connection', socket => {
   })
 
   socket.on('error', err => {
-    console.log("Error de conexión ", err.message);
+    console.log("Error de conexión ", JSON.stringify(err.message));
   });
 
   socket.on("pulsar",  msaPulsar => {
-    console.log(" Mensaje entrante==>  ", msaPulsar );
+    console.log(" Mensaje entrante==>  ", JSON.stringify(msaPulsar) );
   })
 })  
  // * Funcion que reenvia los msj de notificaciones al celular 
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
-  console.log('Enviar al cel: nit + imael=> ' + datosNit + " Datos envio Socket  " + envioPhone);
+  console.log('Enviar al cel: nit + imael=> ' + JSON.stringify(datosNit) + " Datos envio Socket  " + JSON.stringify(envioPhone));
   try {
     io.emit(datosNit, envioPhone)  
   } catch (error) {
@@ -98,14 +98,14 @@ async function consumeMessages() {
     operationTimeoutSeconds: 30
   })
 
-  console.log(" clientPulsar notificaciones ==> " , clientPulsar );
+  console.log(" clientPulsar notificaciones ==> " , JSON.stringify(clientPulsar) );
 
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
     subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Shared'
   })
-  console.log(" Consumidor pulsar  " , consumer ); 
+  console.log(" Consumidor pulsar  " , JSON.stringify(consumer) ); 
   if (topicPulsar === 'notificacion') {
     try {
       while (true) {
@@ -117,9 +117,9 @@ async function consumeMessages() {
         // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
         await consumer.acknowledge(message); 
         mensajeNotificacionPulsar = JSON.parse(jsonString)
-        console.log('mensajeNotificacionPulsar ==>', mensajeNotificacionPulsar)
+        console.log('mensajeNotificacionPulsar ==>', JSON.stringify(mensajeNotificacionPulsar))
         notificaciones_electronicas = mensajeNotificacionPulsar.notificacionesElectronicas
-        console.log(' Datos notificaciones_electronicas ==>', mensajeNotificacionPulsar)
+        console.log(' Datos notificaciones_electronicas ==>', JSON.stringify(mensajeNotificacionPulsar))
         let objEnvioNotificacion = {
           idNotificacion: mensajeNotificacionPulsar.idNotificacion,
           actoadministrativo: notificaciones_electronicas.actoAdministrativo,
@@ -142,11 +142,11 @@ async function consumeMessages() {
 
             listaDispositivos = JSON.parse(response)
          
-            console.log('Repuesta del consumo del listado de dispositivos: ' + listaDispositivos)
+            console.log('Repuesta del consumo del listado de dispositivos: ' + JSON.stringify(listaDispositivos))
             arrDispositivos = listaDispositivos.dispositivos
             console.log('  ---------------------- Array Dispositivos ------------------------------ ')
-            console.log('Longitud Array Dispositivos ===>  ' + arrDispositivos.length)
-            console.log(' Array Dispositivos ===>  ', arrDispositivos)
+            console.log('Longitud Array Dispositivos ===>  ' + JSON.stringify(arrDispositivos.length))
+            console.log(' Array Dispositivos ===>  ', JSON.stringify(arrDispositivos))
 
             if (arrDispositivos.length > 0) {                    
               arrDispositivos.forEach(element => {
@@ -174,11 +174,11 @@ async function consumeMessages() {
                     envioPhoneNotificacion.idNotificacion = mensajeNotificacionPulsar.idNotificacion                    
                     const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
                     console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + " nombre del dispositivo " + modeloNoti.nombreDispositivo)
-                    console.log(" Envio_Socket_datos =>  ",  envioPhoneNotificacion);
+                    console.log(" Envio_Socket_datos =>  ",  JSON.stringify(envioPhoneNotificacion));
                     console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeNotificacionPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeNotificacionPulsar.cuerpo);
                     envioPhoneNotificacion.cabezera = mensajeNotificacionPulsar.cabecera;
                     envioPhoneNotificacion.cuerpo = mensajeNotificacionPulsar.cuerpo;
-                    console.log(" envioPhoneNotificacion ==> " , envioPhoneNotificacion);
+                    console.log(" envioPhoneNotificacion ==> " , JSON.stringify(envioPhoneNotificacion));
                     enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
                     enviarMensajeNotificacionSocket(strNitImei, envioPhoneNotificacion)
                   }
@@ -229,9 +229,9 @@ async function consumeMessagesPulsarAvisos() {
       const startIndex = messageText.indexOf('AvisosPush')
       const jsonString = messageText.substring(startIndex + 'AvisosPush'.length)
       mensaje_pulsar_avisos = JSON.parse(jsonString)
-      console.log('Mensaje pulsar avisos ==>  '+ mensaje_pulsar_avisos)
+      console.log('Mensaje pulsar avisos ==>  '+ JSON.stringify(mensaje_pulsar_avisos))
       avisosPulsar = mensaje_pulsar_avisos.avisos
-      console.log('Datos avisosPulsar  => ', avisosPulsar)
+      console.log('Datos avisosPulsar  => '+ JSON.stringify(avisosPulsar))
 
       let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
 
@@ -245,7 +245,7 @@ async function consumeMessagesPulsarAvisos() {
       arrDispositivos = []
 
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-      console.log('Dispositivos Avisos =>  ', response)
+      console.log('Dispositivos Avisos =>  '+ JSON.stringify(response))
 
       listaDispositivos = JSON.parse(response)
       console.log("  dispositivo- transaccion " + listaDispositivos.transaccion + "  dispositivo- mensaje " + listaDispositivos.mensaje)
@@ -253,7 +253,7 @@ async function consumeMessagesPulsarAvisos() {
       arrDispositivos = listaDispositivos.dispositivos
       console.log(arrDispositivos)
       console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
-      console.log('  AVISOS arrDispositivos  Datos----- ', arrDispositivos)
+      console.log('  AVISOS arrDispositivos  Datos----- '+ JSON.stringify(arrDispositivos))
 
       if (arrDispositivos.length > 0) {            
         arrDispositivos.forEach(element => {
@@ -280,14 +280,14 @@ async function consumeMessagesPulsarAvisos() {
               console.log( '  avisos - IMEI ==> ' + modeloNoti.imei );
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneAvisos.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
-                console.log(' avisos mensaje notificacion Datos ==>  ',envioPhoneAvisos)
+                console.log(' avisos mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneAvisos))
                 console.log(' avisos nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
                 console.log(' mensaje_pulsar_avisos.nit ' + mensaje_pulsar_avisos.nit )
                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
                 console.log("Mensaje Mensajeria => Cabezera ==> " + mensaje_pulsar_avisos.cabecera + " Mensaje - Cuerpo  ==> " + mensaje_pulsar_avisos.cuerpo);
                 envioPhoneAvisos.cabezera = mensaje_pulsar_avisos.cabecera;
                 envioPhoneAvisos.cuerpo = mensaje_pulsar_avisos.cuerpo;
-                console.log(" envioPhoneAvisos ==> " , envioPhoneAvisos);
+                console.log(" envioPhoneAvisos ==> " + JSON.stringify(envioPhoneAvisos));
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
               }
             }
@@ -332,7 +332,7 @@ async function consumeMessagesMensajeria() {
       // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
       await consumer.acknowledge(message);
       mensajeriaPulsar = JSON.parse(jsonString)
-      console.log("Mensajeria Pulsar", " ==>  " ,  mensajeriaPulsar);
+      console.log("Mensajeria Pulsar", " ==>  " +  JSON.stringify(mensajeriaPulsar));
       const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
 
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
@@ -347,7 +347,7 @@ async function consumeMessagesMensajeria() {
       console.log(" listaDispositivos.transaccion " + listaDispositivos.transaccion + "  listaDispositivos.mensaje " +  listaDispositivos.mensaje );
       arrDispositivos = listaDispositivos.dispositivos
       console.log(" mensajeria arrDispositivos.length => "+ arrDispositivos.length);
-      console.log(" mensajeria push arrDispositivos => " + arrDispositivos );
+      console.log(" mensajeria push arrDispositivos => " + JSON.stringify(arrDispositivos) );
       if (arrDispositivos.length > 0) {      
         arrDispositivos.forEach(element => {
           modeloNoti = element
@@ -359,14 +359,14 @@ async function consumeMessagesMensajeria() {
             if (modeloNoti.imei != '') {
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
-                console.log(' MensajeriaPush mensaje notificacion Datos ==>  ',envioPhoneMensajeria)                
+                console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
                 console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
                 const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-                console.log("Envio mensajeria push => ", envioPhoneMensajeria , " Mensajeria Push ==> " , strNitImei );
+                console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " Mensajeria Push ==> " + strNitImei );
                 console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
                 envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
                 envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
-                console.log(" envioPhoneMensajeria ==> " , envioPhoneMensajeria);
+                console.log(" envioPhoneMensajeria ==> " + JSON.stringify(envioPhoneMensajeria));
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
               }
             }
@@ -390,7 +390,7 @@ consumeMessagesMensajeria().catch(error => {
 
 //  ***************************** Muestra las IPS de RED *****************
 const networkInterfaces = os.networkInterfaces();
-console.log( " NetworkInterfaces ==> " , networkInterfaces)
+console.log( " NetworkInterfaces ==> " , JSON.stringify(networkInterfaces))
 
 httpServer.listen(process.env.PORT, () => {
   console.log('Servidor a la espera de conexion ', config.PORT)
