@@ -134,6 +134,8 @@ async function consumeMessages() {
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
           responseToken = JSON.parse(responseTokenD)
+          console.log("Response Token ======> " + JSON.stringify(responseToken))
+
           const tokenRespuesta = responseToken.token
           arrDispositivos = []
 
@@ -241,6 +243,7 @@ async function consumeMessagesPulsarAvisos() {
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
+      console.log("Response Token ======> " + JSON.stringify(responseToken))
       const tokenRespuesta = responseToken.token
       arrDispositivos = []
 
@@ -338,6 +341,7 @@ async function consumeMessagesMensajeria() {
       const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
       const responseTokenD = await getToken(API_URL_TOKEN)
       const responseToken = JSON.parse(responseTokenD)
+      console.log("Response Token ======> " + JSON.stringify(responseToken))
       const tokenRespuesta = responseToken.token
       arrDispositivos = []
 
