@@ -195,7 +195,6 @@ async function consumeMessages() {
         } catch (error) {
           console.error('Error Obtener Token==>:', error.message)
         }
-        consumer.acknowledge(message)
       }
     } catch (error) {
       console.error( "Error al ",  error  + " Error cliente pulsar ");
@@ -299,7 +298,6 @@ async function consumeMessagesPulsarAvisos() {
       } else {
         console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
       }
-      consumer.acknowledge(message)
     }
   } catch (error) {
     console.error(error)
@@ -378,8 +376,8 @@ async function consumeMessagesMensajeria() {
         })
       } else {
         console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
-      }
-      consumer.acknowledge(message)
+      }  
+
     }
   } catch (error) {
     console.error(error)
