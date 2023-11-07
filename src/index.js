@@ -200,6 +200,9 @@ async function consumeMessages() {
       console.error( "Error al ",  error  + " Error cliente pulsar ");
       consumer.negativeAcknowledge(message)
       clientPulsar.close()
+    } finally {
+      await clientPulsar.close()
+      await consumer.close()
     }
   }
 }
@@ -303,6 +306,9 @@ async function consumeMessagesPulsarAvisos() {
     console.error(error)
     consumer.negativeAcknowledge(message)
     clientPulsar.close()
+  } finally {
+      await clientPulsar.close()
+      await consumer.close()
   }
 }
 // ! Funcion principal 2 llamada
@@ -383,6 +389,9 @@ async function consumeMessagesMensajeria() {
     console.error(error)
     consumer.negativeAcknowledge(message)
     clientPulsar.close()
+  } finally {
+    await clientPulsar.close()
+    await consumer.close()
   }
 }
 //  ***************************** Metodo consumeMessagesMensajeria *****************
