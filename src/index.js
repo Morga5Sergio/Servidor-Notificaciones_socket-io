@@ -103,7 +103,7 @@ async function consumeMessages() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
     subscription: `pulser-default`,
-    subscriptionType: 'Shared'
+    // subscriptionType: 'Shared'
   })
   console.log(" Consumidor pulsar  " , JSON.stringify(consumer) ); 
   if (topicPulsar === 'notificacion') {
@@ -222,7 +222,7 @@ async function consumeMessagesPulsarAvisos() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsarAvisos}`,
     subscription: `pulser-default`,
-    subscriptionType: 'Shared'
+    // subscriptionType: 'Shared'
   })
 
   try {
@@ -326,7 +326,7 @@ async function consumeMessagesMensajeria() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespacePulsarMensajeria}/${topicPulsarMensajeria}`,
     subscription: `pulser-default`,
-    subscriptionType: 'Shared'
+    // subscriptionType: 'Shared'
   })
 
   try {
