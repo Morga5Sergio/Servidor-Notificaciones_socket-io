@@ -1,6 +1,6 @@
 let listaDispositivos = {
     transaccion: "",
-    mensaje:[],
+    mensajes:[],
     dispositivos: []
     
 }
