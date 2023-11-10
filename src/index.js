@@ -103,7 +103,8 @@ async function consumeMessages() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsar}`,
     subscription: `${uniqueRandomNumberWithText}`,
-    subscriptionType: 'Shared'
+    subscriptionType: 'Shared',
+    consumerName : 'nameNotificaciones'
   })
   console.log(" Consumidor pulsar  " , JSON.stringify(consumer) ); 
   if (topicPulsar === 'notificacion') {
@@ -324,7 +325,8 @@ async function consumeMessagesMensajeria() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespacePulsarMensajeria}/${topicPulsarMensajeria}`,
     subscription: `${uniqueRandomNumberWithText}`,
-    subscriptionType: 'Shared'
+    subscriptionType: 'Shared',
+    consumerName : 'nameMensajeria'
   })
 
   try {
