@@ -227,7 +227,8 @@ async function consumeMessagesPulsarAvisos() {
   const consumer = await clientPulsar.subscribe({
     topic: `persistent://${tenant}/${namespace}/${topicPulsarAvisos}`,
     subscription: `${uniqueRandomNumberWithText}`,
-    subscriptionType: 'Shared'
+    subscriptionType: 'Shared',
+    consumerName : 'nameAvisos'
   })
 
   try {
