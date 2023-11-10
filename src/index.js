@@ -229,6 +229,7 @@ async function consumeMessagesPulsarAvisos() {
     subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Shared',
     consumerName : 'nameAvisos'
+
   })
 
   try {
