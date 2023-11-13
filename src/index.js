@@ -81,7 +81,11 @@ io.on('connection', socket => {
     console.log(" Mensaje entrante==>  ", JSON.stringify(msaPulsar) );
   })
 })  
- // * Funcion que reenvia los msj de notificaciones al celular 
+ /**
+  * @author GaryMorga
+  * @description Funcion que reenvia los msj de notificaciones al celular 
+  * @datos datosNit = nit-imei , envioPhone =  {'idNotificacion': '', 'tipo': 'notificacion','cabezera':'', 'cuerpo':''}
+  */
 function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   console.log('Enviar al cel: nit + imael=> ' + JSON.stringify(datosNit) + " Datos envio Socket  " + JSON.stringify(envioPhone));
   try {
@@ -91,7 +95,7 @@ function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   }
 }
 
-// ? ***************************** Metodo consumeMessages Notificaciones *****************
+// NOTIFICACIONES_WEB_PUSH_SOCKET
 async function consumeMessages() {
   const clientPulsar = new pulsar.Client({
     serviceUrl,
@@ -131,11 +135,11 @@ async function consumeMessages() {
         const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
         const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
         
-        console.log("API TOKEN Generico ==> " + API_URL_TOKEN );
+        console.log("Notificacion - API TOKEN Generico ==> " + API_URL_TOKEN );
         try {
           const responseTokenD = await getToken(API_URL_TOKEN)
           responseToken = JSON.parse(responseTokenD)
-          console.log("Response Token ======> " + JSON.stringify(responseToken))
+          console.log("Notificacion Response Token ======> " + JSON.stringify(responseToken))
 
           const tokenRespuesta = responseToken.token
           arrDispositivos = []
@@ -146,18 +150,16 @@ async function consumeMessages() {
             listaDispositivos = JSON.parse(response)
 
             if (listaDispositivos?.mensajes[0]?.codigo === 1) {
-              console.log('Repuesta del consumo del listado de dispositivos: ' + JSON.stringify(listaDispositivos))
+              console.log('Notificacion Repuesta del consumo del listado de dispositivos: ' + JSON.stringify(listaDispositivos))
               arrDispositivos = listaDispositivos.dispositivos
-              console.log('  ---------------------- Array Dispositivos ------------------------------ ')
-              console.log('Longitud Array Dispositivos ===>  ' + JSON.stringify(arrDispositivos.length))
-              console.log(' Array Dispositivos ===>  ', JSON.stringify(arrDispositivos))
+              console.log('Notificacion-Longitud Array Dispositivos ===> ' + JSON.stringify(arrDispositivos.length))
+              console.log('Notificacion-Array Dispositivos ===>  ', JSON.stringify(arrDispositivos))
 
               if (arrDispositivos.length > 0) {
                 arrDispositivos.forEach(element => {
+                  console.log('Notificacion Modelo Datos del dispositivo')
                   modeloNoti = element
-                  console.log(modeloNoti)
-                  console.log('--- Noitiicasd --- ')
-                  console.log(modeloNoti.tokenPush)
+                  console.log(modeloNoti)            
                   if (modeloNoti.webId != null) {
                     if (modeloNoti.descripcionEstado === 'ACTIVO') {
                       console.log('ENVIANDO NOTIFICACION PARA WEB')
@@ -182,8 +184,7 @@ async function consumeMessages() {
                       console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeNotificacionPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeNotificacionPulsar.cuerpo)
                       envioPhoneNotificacion.cabezera = mensajeNotificacionPulsar.cabecera
                       envioPhoneNotificacion.cuerpo = mensajeNotificacionPulsar.cuerpo
-                      console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneNotificacion))
-                      enviarMensajeNotificacionSocket(strNitImei, envioPhoneAvisos)
+                      console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneNotificacion))                 
                       enviarMensajeNotificacionSocket(strNitImei, envioPhoneNotificacion)
                     }
                   }
@@ -212,12 +213,11 @@ async function consumeMessages() {
   }
 }
 
-// 
 consumeMessages().catch(error => {
   console.error('Error en el consumidor:', error)
 })
 
-// ? ***************************** Metodo consumeMessagesPulsarAvisos *****************
+// AVISOS_WEB_PUSH_SOCKET
 async function consumeMessagesPulsarAvisos() {
   const clientPulsar = new pulsar.Client({
     serviceUrl,
@@ -229,7 +229,6 @@ async function consumeMessagesPulsarAvisos() {
     subscription: `${uniqueRandomNumberWithText}`,
     subscriptionType: 'Shared',
     consumerName : 'nameAvisos'
-
   })
 
   try {
@@ -259,8 +258,8 @@ async function consumeMessagesPulsarAvisos() {
       const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
       console.log('Dispositivos Avisos =>  '+ JSON.stringify(response))
 
-      listaDispositivos = JSON.parse(response)
-      console.log("  dispositivo- transaccion " + listaDispositivos.transaccion + "  dispositivo- mensaje " + listaDispositivos.mensaje)
+      listaDispositivos = JSON.parse(response)    
+      console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
       if (listaDispositivos?.mensajes[0]?.codigo === 1) {
         arrDispositivos = listaDispositivos.dispositivos
         console.log(arrDispositivos)
@@ -270,9 +269,9 @@ async function consumeMessagesPulsarAvisos() {
         if (arrDispositivos.length > 0) {
           arrDispositivos.forEach(element => {
             modeloNoti = element
-            console.log(' Elemento AVISO => ' + modeloNoti)
+            console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
 
-            console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
+            console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
             if (modeloNoti.webId != null) {
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
                 console.log('ENVIANDO NOTIFICAION PARA WEB')
@@ -312,12 +311,12 @@ async function consumeMessagesPulsarAvisos() {
       await consumer.close()
   }
 }
-// ! Funcion principal 2 llamada
+
 consumeMessagesPulsarAvisos().catch(error => {
   console.error('Error en el consumidor mensajeria _ pulsar:', error)
 })
 
-// Notificaciones de mensajeria push
+// MENSAJERIA_WEB_PUSH_SOCKET
 async function consumeMessagesMensajeria() {
   const clientPulsar = new Client({
     serviceUrl,
@@ -401,7 +400,7 @@ async function consumeMessagesMensajeria() {
     await consumer.close()
   }
 }
-//  ***************************** Metodo consumeMessagesMensajeria *****************
+
 consumeMessagesMensajeria().catch(error => {
   console.error('Error en el consumidor mensajeria:', error)
 })
