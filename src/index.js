@@ -89,6 +89,7 @@ function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   }
 }
 
+
 async function mensajeriaEnvioPush(objMensajeria){
   mensajeriaPulsar = objMensajeria;
   console.log("Mensajeria Pulsar", " ==>  " +  JSON.stringify(mensajeriaPulsar));
@@ -142,95 +143,6 @@ async function mensajeriaEnvioPush(objMensajeria){
 
 
 }
-
-// MENSAJERIA_WEB_PUSH_SOCKET
-/* async function consumeMessagesMensajeria() {
-  const clientPulsar = new Client({
-    serviceUrl,
-    operationTimeoutSeconds: 30
-  })
-
-  const consumer = await clientPulsar.subscribe({
-    topic: `persistent://${tenant}/${namespacePulsarMensajeria}/${topicPulsarMensajeria}`,
-    subscription: `${uniqueRandomNumberWithText}`,
-    subscriptionType: 'Shared',
-    consumerName : 'nameMensajeria'
-  })
-
-  try {
-    while (true) {
-      const message = await consumer.receive()
-      const messageText = message.getData().toString()
-
-      const startIndex = messageText.indexOf('MensajeriaPush')
-      const jsonString = messageText.substring(startIndex + 'MensajeriaPush'.length)
-      // Despues de procesar el mensaje, confirmar que se ha procesado correctamente
-      await consumer.acknowledge(message);
-      mensajeriaPulsar = JSON.parse(jsonString)
-      console.log("Mensajeria Pulsar", " ==>  " +  JSON.stringify(mensajeriaPulsar));
-      const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
-
-      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
-      const responseTokenD = await getToken(API_URL_TOKEN)
-      const responseToken = JSON.parse(responseTokenD)
-      console.log("Response Token ======> " + JSON.stringify(responseToken))
-      const tokenRespuesta = responseToken.token
-      arrDispositivos = []
-
-      const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-
-      listaDispositivos = JSON.parse(response)
-      if(listaDispositivos?.mensajes[0]?.codigo === 1){
-        console.log(" listaDispositivos.transaccion " + listaDispositivos.transaccion + "  listaDispositivos.mensaje " +  JSON.stringify(listaDispositivos.mensajes) );
-        arrDispositivos = listaDispositivos.dispositivos
-        console.log(" mensajeria arrDispositivos.length => "+ arrDispositivos.length);
-        console.log(" mensajeria push arrDispositivos => " + JSON.stringify(arrDispositivos) );
-        if (arrDispositivos.length > 0) {      
-          arrDispositivos.forEach(element => {
-            modeloNoti = element
-            if (modeloNoti.webId != null) {
-              if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeriaPulsar.cabecera,mensajeriaPulsar.cuerpo,'Ir a mensajeria')                      
-              }
-            } else {
-              if (modeloNoti.imei != '') {
-                if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                  envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
-                  console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
-                  console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
-                  const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-                  console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " Mensajeria Push ==> " + strNitImei );
-                  console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
-                  envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
-                  envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
-                  console.log(" envioPhoneMensajeria ==> " + JSON.stringify(envioPhoneMensajeria));
-                  enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
-                }
-              }
-            }
-          })
-        } else {
-          console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
-        }  
-      }else {
-        console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion); 
-      }
-    
-
-    }
-  } catch (error) {
-    console.error(error)
-    consumer.negativeAcknowledge(message)
-    clientPulsar.close()
-  } finally {
-    await clientPulsar.close()
-    await consumer.close()
-  }
-}
-
-consumeMessagesMensajeria().catch(error => {
-  console.error('Error en el consumidor mensajeria:', error)
-}) */
 
 //  ***************************** Muestra las IPS de RED *****************
 const networkInterfaces = os.networkInterfaces();
