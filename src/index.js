@@ -243,9 +243,25 @@ app.post('/envio/mensajeria', async (req, res) => {
     console.log("Datos de mensajer")
     console.log(req.body)
     mensajeriaEnvioPush(req.body)
-    res.status(200).json({success: "Se envio de forma correcta el mensaje", state: true}) 
+    res.status(200).json({
+      transaccion: true,
+      mensajes: [
+        {
+          codigo: 1,
+          descripcion: 'Se envio de forma correcta el mensaje.'
+        }
+      ]
+    }) 
   } catch (error) {
-    res.status(500).json({ error: 'Hubo un error al obtener los datos', state: false });
+    res.status(200).json({
+      transaccion: true,
+      mensajes: [
+        {
+          codigo: -1,
+          descripcion: 'Error envio mensajeria.'
+        }
+      ]
+    }) 
   }
 });
 
