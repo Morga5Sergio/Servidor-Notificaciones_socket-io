@@ -267,5 +267,22 @@ function getListaDeUsuarioDispositivos(token, pUrlRespuestaUsuario) {
 function getToken(pApiUrlToken) {
   return makeHttpRequest('GET', pApiUrlToken)
 }
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+
+//* Ruta que usa async/await para el envio de informacion MENSAJERIA
+app.post('/envio/mensajeria', async (req, res) => {
+  try {
+    console.log(req.body)
+    const { nit } = req.body
+    console.log("nitttt", nit)
+    enviarMensajeNotificacionSocket(55454, 684455) 
+    res.status(200).json({success: "Se envio de forma correcta el mensaje", state: true}) 
+  } catch (error) {
+    res.status(500).json({ error: 'Hubo un error al obtener los datos', state: false });
+  }
+});
+
 // const indexRoutes = require('./routes/test.routes')
 app.use(indexRoutes)
