@@ -89,7 +89,6 @@ function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
   }
 }
 
-
 async function mensajeriaEnvioPush(objMensajeria){
   mensajeriaPulsar = objMensajeria;
   console.log("Mensajeria Pulsar", " ==>  " +  JSON.stringify(mensajeriaPulsar));
