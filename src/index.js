@@ -1,8 +1,5 @@
 import indexRoutes from './routes/test.routes'
-import uniqueRandomNumberWithText from './util/uuid.util'
 require('dotenv').config()
-console.log('uniqueRandomNumberWithText =============>', uniqueRandomNumberWithText)
-
 const { Client } = require('pulsar-client')
 const express = require('express')
 const path = require('path')
@@ -10,13 +7,7 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 const app = express()
 const webpush = require('web-push')
-const pulsar = require('pulsar-client')
 const config = require('../src/config')
-const serviceUrl = config.PULSAR_BROKERS;
-const tenant = config.PULSAR_TENANT;
-
-const namespacePulsarMensajeria = 'sad_men'
-const topicPulsarMensajeria = 'mensajeria'
 const os = require('os');
 const cors = require('cors');
 
@@ -158,7 +149,7 @@ httpServer.listen(process.env.PORT, () => {
 // * MEJORADO ------------> util
 function envioNotificacion(endPointWeb,keyWeb,authWeb,cabecera,cuerpo,mensajeNotificacion) {
   let urlPDF = ''
-  urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria`
+  urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria/true`
   // urlPDF = 'https://desasiat.impuestos.gob.bo/notificaciones/con/mensajeria'
   console.log("Ruta ==> " , urlPDF);
 
@@ -254,7 +245,7 @@ app.post('/envio/mensajeria', async (req, res) => {
     }) 
   } catch (error) {
     res.status(200).json({
-      transaccion: true,
+      transaccion: false,
       mensajes: [
         {
           codigo: -1,
