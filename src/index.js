@@ -218,9 +218,8 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio){
                 if (modeloNoti.descripcionEstado == 'ACTIVO') {
                   envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
                   envioPhoneMensajeria.tipo = "avisos";
-                  console.log(' avisos mensaje notificacion Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
-                  console.log(' avisos nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivos ' + modeloNoti.nombreDispositivo)
-                  console.log(' mensaje_pulsar_avisos.nit ' + mensaje_pulsar_avisos.nit)
+                  console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+                  console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)                  
                   const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
                   console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
                   envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
@@ -274,9 +273,9 @@ async function mensajeriaEnvioPush(objMensajeria){
               envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
               envioPhoneMensajeria.idNotificacion = "mensajeria"
               console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
-              console.log(' mensaje_pulsar_mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivos " + modeloNoti.nombreDispositivo);
+              console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivo " + modeloNoti.nombreDispositivo);
               const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-              console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " Mensajeria Push ==> " + strNitImei );
+              console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " String_IMEI-NIT ==> " + strNitImei);
               console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
               envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
               envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
@@ -303,28 +302,24 @@ httpServer.listen(process.env.PORT, () => {
   
 })
 
-
-
-// * MEJORADO ------------> util
+/**
+  * @author GaryMorga
+  * @description DTOS Función para enviar la notificación 
+*/
 function envioNotificacion(endPointWeb,keyWeb,authWeb,cabecera,cuerpo,mensajeNotificacionTitulo,objEnvioNotificacion,tipo) {
   let urlPDF = ''
+  var varNotificacion = true;
   urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria/true`
   if (tipo === 'notificacion') {
-    //urlPDF = `http://localhost:4200/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}/true`
-    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}/'true'`
-    //urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}`
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}/${varNotificacion}`
     console.log('Url_PDF notificaciones =>  ', urlPDF)
   } else if (tipo === 'avisos') {
-    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}/true`
-    // urlPDF = `https://desasiat.impuestos.gob.bo/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}`    
+    urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/listaAvisos/${objEnvioNotificacion.idAviso}/${objEnvioNotificacion.archivoPdf}/${varNotificacion}`
     console.log('Url_PDF Avisos =>  ', urlPDF)
   } else {
     urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria`
-    // urlPDF = 'https://desasiat.impuestos.gob.bo/notificaciones/con/mensajeria'
-    console.log("Ruta ==> " , urlPDF);
+    console.log("Ruta_Mensajeria " , urlPDF);
   }
-  console.log("Ruta ==> " , urlPDF);
-
   const pushSubscription = {
     endpoint: endPointWeb,
     expirationTime: null,
@@ -403,7 +398,7 @@ app.use(express.urlencoded({ extended: false }))
 //* Ruta que usa async/await para el envio de informacion MENSAJERIA
 app.post('/envio/mensajeria', async (req, res) => {
   try {
-    console.log("Datos de mensajer")
+    console.log("Datos de mensajeria")
     console.log(req.body)
     mensajeriaEnvioPush(req.body)
     res.status(200).json({
