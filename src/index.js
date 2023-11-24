@@ -23,7 +23,7 @@ webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, va
   * @description DTOS para mensajeria
 */
 let mensajeriaPulsar = require('./models/mensaje_pulsar')
-let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': '', 'cabezera':'', 'cuerpo':''}
+let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': '', 'cabezera':'', 'cuerpo':'', "archivoAdjuntoActuadoId":""}
 
 /**
   * @author GaryMorga
@@ -149,10 +149,14 @@ async function notificacionEnvioPush(ObjetoNotificaionPush){
                 console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + ' nombre del dispositivo ' + modeloNoti.nombreDispositivo)
                 console.log(' Envio_Socket_datos =>  ', JSON.stringify(envioPhoneMensajeria))
                 console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeNotificacionPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeNotificacionPulsar.cuerpo)
-                envioPhoneMensajeria.cabezera = mensajeNotificacionPulsar.cabecera
-                envioPhoneMensajeria.cuerpo = mensajeNotificacionPulsar.cuerpo
-                console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneMensajeria))                 
+                envioPhoneMensajeria.cabezera = mensajeNotificacionPulsar.cabecera;
+                envioPhoneMensajeria.cuerpo = mensajeNotificacionPulsar.cuerpo;
+                envioPhoneMensajeria.archivoAdjuntoActuadoId = objEnvioNotificacion.archivoAduntoId;                
+                console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneMensajeria))
+
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+              }else {
+                
               }
             }
           })
@@ -271,7 +275,7 @@ async function mensajeriaEnvioPush(objMensajeria){
           if (modeloNoti.imei != '') {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
               envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
-              envioPhoneMensajeria.idNotificacion = "mensajeria"
+              envioPhoneMensajeria.tipo = "mensajeria"
               console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
               console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivo " + modeloNoti.nombreDispositivo);
               const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei

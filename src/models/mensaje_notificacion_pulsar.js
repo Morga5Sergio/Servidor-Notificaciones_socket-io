@@ -1,6 +1,6 @@
 let mensajeNotificacionKafka = {
     id:""
-    ,usuarioRegistroId:0
+   ,usuarioRegistroId:0
    ,usuarioUltimaModificacionId:0
    ,fechaRegistro:0
    ,fechaUltimaModificacion:0
