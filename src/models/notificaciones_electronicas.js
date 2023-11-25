@@ -4,6 +4,6 @@ let notificaciones_electronicas = {
     usuarioUltimaModificacionId: 0,
     fechaRegistro: "",
     fechaUltimaModificacion: "",
-    archivoAdjuntoActuadoId: "6516e2858e677818d67f1597"
+    archivoAdjuntoActuadoId: ""
 }
 module.exports = notificaciones_electronicas;
