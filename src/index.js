@@ -23,7 +23,7 @@ webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, va
   * @description DTOS para mensajeria
 */
 let mensajeriaPulsar = require('./models/mensaje_pulsar')
-let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': '', 'cabezera':'', 'cuerpo':'', "archivoAdjuntoActuadoId":"", "estadoNotificacionElectronicoId": ""}
+let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': '', 'cabezera':'', 'cuerpo':'', "archivoAdjuntoActuadoId":"", "estadoNotificacionElectronicoId": "", "archivoPdf": ""}
 
 /**
   * @author GaryMorga
@@ -229,6 +229,7 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio){
                   console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
                   envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
                   envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
+                  envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
                   console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
                   enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
                 }
