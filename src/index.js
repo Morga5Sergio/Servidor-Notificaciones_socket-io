@@ -137,8 +137,10 @@ async function notificacionEnvioPush(ObjetoNotificaionPush){
             console.log(modeloNoti)            
             if (modeloNoti.webId != null) {
               if (modeloNoti.descripcionEstado === 'ACTIVO') {
-                console.log('ENVIANDO NOTIFICACION PARA WEB')
-                envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeNotificacionPulsar.cabecera,mensajeNotificacionPulsar.cuerpo,'Ir a ver la notificación',objEnvioNotificacion,'notificacion')
+                if (!mensajeNotificacionPulsar.envio_socket) {
+                  console.log('ENVIANDO NOTIFICACION PARA WEB')
+                  envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeNotificacionPulsar.cabecera,mensajeNotificacionPulsar.cuerpo,'Ir a ver la notificación',objEnvioNotificacion,'notificacion')
+                }
               }
             } else {
               if (modeloNoti.imei != '' && modeloNoti.descripcionEstado === 'ACTIVO') {
@@ -214,8 +216,10 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio){
             console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
             if (modeloNoti.webId != null) {
               if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                console.log('ENVIANDO NOTIFICAION PARA WEB')
-                envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
+                if (!mensajeNotificacionPulsar.envio_socket) {
+                  console.log('ENVIANDO NOTIFICAION PARA WEB')
+                  envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
+                }
               }
             } else {
               if (modeloNoti.imei != '') {
@@ -271,7 +275,9 @@ async function mensajeriaEnvioPush(objMensajeria){
         modeloNoti = element
         if (modeloNoti.webId != null) {
           if (modeloNoti.descripcionEstado == 'ACTIVO') {
-            envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeriaPulsar.cabecera,mensajeriaPulsar.cuerpo,'Ir a mensajeria')                      
+            if (!mensajeNotificacionPulsar.envio_socket) {
+              envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeriaPulsar.cabecera,mensajeriaPulsar.cuerpo,'Ir a mensajeria')                      
+            }
           }
         } else {
           if (modeloNoti.imei != '') {
