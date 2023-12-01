@@ -144,20 +144,22 @@ async function notificacionEnvioPush(ObjetoNotificaionPush){
               }
             } else {
               if (modeloNoti.imei != '' && modeloNoti.descripcionEstado === 'ACTIVO') {
-                console.log('ENVIANDO NOTIFICACION PARA MOVIL_ IMEI=> ', modeloNoti.imei, ' Nombre del dispositivos==> ', modeloNoti.nombreDispositivo)
-                envioPhoneMensajeria.idNotificacion = mensajeNotificacionPulsar.idNotificacion
-                envioPhoneMensajeria.tipo = "notificacion";
-                const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
-                console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + ' nombre del dispositivo ' + modeloNoti.nombreDispositivo)
-                console.log(' Envio_Socket_datos =>  ', JSON.stringify(envioPhoneMensajeria))
-                console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeNotificacionPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeNotificacionPulsar.cuerpo)
-                envioPhoneMensajeria.cabezera = mensajeNotificacionPulsar.cabecera;
-                envioPhoneMensajeria.cuerpo = mensajeNotificacionPulsar.cuerpo;
-                envioPhoneMensajeria.archivoAdjuntoActuadoId = objEnvioNotificacion.archivoAduntoId;
-                envioPhoneMensajeria.estadoNotificacionElectronicoId = mensajeNotificacionPulsar.estadoNotificacion;                 
-                console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneMensajeria))
-
-                enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+                if (!mensajeNotificacionPulsar.envio_socket) {
+                  console.log('ENVIANDO NOTIFICACION PARA MOVIL_ IMEI=> ', modeloNoti.imei, ' Nombre del dispositivos==> ', modeloNoti.nombreDispositivo)
+                  envioPhoneMensajeria.idNotificacion = mensajeNotificacionPulsar.idNotificacion
+                  envioPhoneMensajeria.tipo = "notificacion";
+                  const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
+                  console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + ' nombre del dispositivo ' + modeloNoti.nombreDispositivo)
+                  console.log(' Envio_Socket_datos =>  ', JSON.stringify(envioPhoneMensajeria))
+                  console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeNotificacionPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeNotificacionPulsar.cuerpo)
+                  envioPhoneMensajeria.cabezera = mensajeNotificacionPulsar.cabecera;
+                  envioPhoneMensajeria.cuerpo = mensajeNotificacionPulsar.cuerpo;
+                  envioPhoneMensajeria.archivoAdjuntoActuadoId = objEnvioNotificacion.archivoAduntoId;
+                  envioPhoneMensajeria.estadoNotificacionElectronicoId = mensajeNotificacionPulsar.estadoNotificacion;                 
+                  console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneMensajeria))
+  
+                  enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+                }
               }else {
                 
               }
@@ -225,17 +227,19 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio){
               if (modeloNoti.imei != '') {
                 console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
                 if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                  envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
-                  envioPhoneMensajeria.tipo = "avisos";
-                  console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
-                  console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)                  
-                  const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
-                  console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
-                  envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
-                  envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
-                  envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
-                  console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
-                  enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+                  if (!mensajeNotificacionPulsar.envio_socket) {
+                    envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
+                    envioPhoneMensajeria.tipo = "avisos";
+                    console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+                    console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)                  
+                    const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
+                    console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
+                    envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
+                    envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
+                    envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
+                    console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
+                    enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+                  }
                 }
               }
             }
@@ -282,17 +286,19 @@ async function mensajeriaEnvioPush(objMensajeria){
         } else {
           if (modeloNoti.imei != '') {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
-              envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
-              envioPhoneMensajeria.tipo = "mensajeria"
-              console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
-              console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivo " + modeloNoti.nombreDispositivo);
-              const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-              console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " String_IMEI-NIT ==> " + strNitImei);
-              console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
-              envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
-              envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
-              console.log(" envioPhoneMensajeria ==> " + JSON.stringify(envioPhoneMensajeria));
-              enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+              if (!mensajeNotificacionPulsar.envio_socket) {
+                envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
+                envioPhoneMensajeria.tipo = "mensajeria"
+                console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
+                console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivo " + modeloNoti.nombreDispositivo);
+                const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
+                console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " String_IMEI-NIT ==> " + strNitImei);
+                console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
+                envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
+                envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
+                console.log(" envioPhoneMensajeria ==> " + JSON.stringify(envioPhoneMensajeria));
+                enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+              }
             }
           }
         }
