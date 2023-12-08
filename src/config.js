@@ -9,7 +9,7 @@ module.exports = {
   PULSAR_TENANT: process.env.PULSAR_TENANT || 'desarrollo',
 
   // * Config DB
-  MON_SAD_NODE_USR: process.env.MON_SAD_NODE_USR || 'pool_sad_not_notificaciones',
-  MON_SAD_NODE_PASS: process.env.MON_SAD_NODE_PASS || '!123abc',
-  MON_SAD_NODE_URL: process.env.MON_SAD_NODE_URL || '10.1.38.204:27017,10.1.38.205:27017,10.1.38.206:27017/sad_notificaciones'
+  MON_SAD_USR: process.env.MON_SAD_USR || 'pool_sad_not_notificaciones',
+  MON_SAD_PASS: process.env.MON_SAD_PASS || '!123abc',
+  MON_SAD_URL: process.env.MON_SAD_URL || '10.1.38.204:27017,10.1.38.205:27017,10.1.38.206:27017/sad_notificaciones'
 }
