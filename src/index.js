@@ -1,3 +1,5 @@
+import NotificacionesPush from '../src/models/NotificacionesPush'
+
 import indexRoutes from './routes/test.routes'
 require('dotenv').config()
 const { Client } = require('pulsar-client')
@@ -8,8 +10,8 @@ const { Server } = require('socket.io')
 const app = express()
 const webpush = require('web-push')
 const config = require('../src/config')
-const os = require('os');
-const cors = require('cors');
+const os = require('os')
+const cors = require('cors')
 
 const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
@@ -19,24 +21,24 @@ const vapidKeys = {
 webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, vapidKeys.privateKey)
 
 /**
-  * @author GaryMorga
-  * @description DTOS para mensajeria
-*/
+ * @author GaryMorga
+ * @description DTOS para mensajeria
+ */
 let mensajeriaPulsar = require('./models/mensaje_pulsar')
-let envioPhoneMensajeria = { 'idNotificacion': '', 'tipo': '', 'cabezera':'', 'cuerpo':'', "archivoAdjuntoActuadoId":"", "estadoNotificacionElectronicoId": "", "archivoPdf": ""}
+let envioPhoneMensajeria = { idNotificacion: '', tipo: '', cabezera: '', cuerpo: '', archivoAdjuntoActuadoId: '', estadoNotificacionElectronicoId: '', archivoPdf: '' }
 
 /**
-  * @author GaryMorga
-  * @description DTOS para notificación
-*/
-let mensajeNotificacionPulsar = require('./models/mensaje_notificacion_pulsar');
+ * @author GaryMorga
+ * @description DTOS para notificación
+ */
+let mensajeNotificacionPulsar = require('./models/mensaje_notificacion_pulsar')
 let notificaciones_electronicas = require('./models/notificaciones_electronicas')
 let responseToken = require('./models/token_model')
 
 /**
-  * @author GaryMorga
-  * @description DTOS para AVISOS
-*/
+ * @author GaryMorga
+ * @description DTOS para AVISOS
+ */
 let mensaje_pulsar_avisos = require('./models/mensaje_pulsar_avisos')
 let avisosPulsar = require('./models/avisos')
 
@@ -44,33 +46,34 @@ let avisosPulsar = require('./models/avisos')
 let listaDispositivos = require('./models/lista_dispositivos')
 let modeloNoti = require('./models/modelos_noti')
 
-
 // * Conextion a la DB
 import './util/mongoose'
 
-app.use(cors({
-  origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
-  methods: ['GET', 'POST']
-}));
+app.use(
+  cors({
+    origin: 'https://desasiatservicios.impuestos.gob.bo/sad-socket-test', // Reemplaza con tu dominio permitido
+    methods: ['GET', 'POST']
+  })
+)
 
 const httpServer = createServer(app)
 
 let arrDispositivos = []
 
-  const io = new Server(httpServer, { 
-    cors: { origin: ['*']}
-  })
-  app.use(express.static(path.join(__dirname, 'views')))
-  app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/index.html')
-  })
+const io = new Server(httpServer, {
+  cors: { origin: ['*'] }
+})
+app.use(express.static(path.join(__dirname, 'views')))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html')
+})
 
 // const _connect = require('./dbConnection/connection')
 // _connect()
 var XMLHttpRequest = require('xhr2')
 const xhr = new XMLHttpRequest()
 
-console.log(" Variables de configuración en environment ==> ",  config);
+console.log(' Variables de configuración en environment ==> ', config)
 io.on('connection', socket => {
   console.log('Clientes conectados: ', io.engine.clientsCount, ' id ' + socket.id)
 
@@ -80,29 +83,32 @@ io.on('connection', socket => {
   })
 
   socket.on('error', err => {
-    console.log("Error de conexión ", JSON.stringify(err.message));
-  });
-
-  socket.on("pulsar",  msaPulsar => {
-    console.log(" Mensaje entrante==>  ", JSON.stringify(msaPulsar) );
+    console.log('Error de conexión ', JSON.stringify(err.message))
   })
-})  
- /**
-  * @author GaryMorga
-  * @description Funcion que reenvia los msj de notificaciones al celular 
-  * @datos datosNit = nit-imei , envioPhone =  {'idNotificacion': '', 'tipo': 'notificacion','cabezera':'', 'cuerpo':''}
-  */
+
+  socket.on('pulsar', msaPulsar => {
+    console.log(' Mensaje entrante==>  ', JSON.stringify(msaPulsar))
+  })
+})
+/**
+ * @author GaryMorga
+ * @description Funcion que reenvia los msj de notificaciones al celular
+ * @datos datosNit = nit-imei , envioPhone =  {'idNotificacion': '', 'tipo': 'notificacion','cabezera':'', 'cuerpo':''}
+ */
 async function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
-  console.log('Enviar al cel: nit + imael=> ' + JSON.stringify(datosNit) + " Datos envio Socket  " + JSON.stringify(envioPhone));
+  console.log('Enviar al cel: nit + imael=> ' + JSON.stringify(datosNit) + ' Datos envio Socket  ' + JSON.stringify(envioPhone))
   try {
-    io.emit(datosNit, envioPhone)  
+    io.emit(datosNit, envioPhone)
   } catch (error) {
-    console.log( "erro => io emit ", error );
+    console.log('erro => io emit ', error)
   }
 }
 
 async function notificacionEnvioPush(ObjetoNotificaionPush) {
   try {
+    const notificaciones = await NotificacionesPush.find({}).limit(10)
+    console.log('notificaciones ==================>', notificaciones)
+
     const mensajeNotificacionPulsar = ObjetoNotificaionPush
     console.log('mensajeNotificacionRecivido ==>', JSON.stringify(mensajeNotificacionPulsar))
     const notificaciones_electronicas = mensajeNotificacionPulsar.notificacionesElectronicas
@@ -178,8 +184,6 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
   }
 }
 
-
-
 // FUNCIÓN PARA ENVIAR NOTIFICACIONES PUSH
 // async function notificacionEnvioPush(ObjetoNotificaionPush){
 //   mensajeNotificacionPulsar = ObjetoNotificaionPush
@@ -190,7 +194,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 
 //   const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensajeNotificacionPulsar.nit
 //   const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
-  
+
 //   console.log("Notificacion - API TOKEN Generico ==> " + API_URL_TOKEN );
 //   try {
 //     const responseTokenD = await getToken(API_URL_TOKEN)
@@ -216,7 +220,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 //           arrDispositivos.forEach(element => {
 //             console.log('Notificacion Modelo Datos del dispositivo')
 //             modeloNoti = element
-//             console.log(modeloNoti)            
+//             console.log(modeloNoti)
 //             if (modeloNoti.webId != null) {
 //               if (modeloNoti.descripcionEstado === 'ACTIVO') {
 //                 if (!mensajeNotificacionPulsar.envio_socket) {
@@ -237,13 +241,13 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 //                   envioPhoneMensajeria.cabezera = mensajeNotificacionPulsar.cabecera;
 //                   envioPhoneMensajeria.cuerpo = mensajeNotificacionPulsar.cuerpo;
 //                   envioPhoneMensajeria.archivoAdjuntoActuadoId = objEnvioNotificacion.archivoAduntoId;
-//                   envioPhoneMensajeria.estadoNotificacionElectronicoId = mensajeNotificacionPulsar.estadoNotificacion;                 
+//                   envioPhoneMensajeria.estadoNotificacionElectronicoId = mensajeNotificacionPulsar.estadoNotificacion;
 //                   console.log(' envioPhoneNotificacion ==> ', JSON.stringify(envioPhoneMensajeria))
-  
+
 //                   enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
 //                 }
 //               }else {
-                
+
 //               }
 //             }
 //           })
@@ -252,7 +256,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 //         }
 //       } else {
 //         console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
-//       }            
+//       }
 //     } catch (error) {
 //       console.error('Error Final :', error.message)
 //     }
@@ -263,122 +267,63 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 
 // FUNCION PARA ENVIAR AVISOS PUSH
 
-async function mensajeriaEnvioAvisos(objAvisosEnvio){
-      mensaje_pulsar_avisos = objAvisosEnvio
-      console.log('Mensaje pulsar avisos ==>  '+ JSON.stringify(mensaje_pulsar_avisos))
-      avisosPulsar = mensaje_pulsar_avisos.avisos
-      console.log('Datos avisosPulsar  => '+ JSON.stringify(avisosPulsar))
+async function mensajeriaEnvioAvisos(objAvisosEnvio) {
+  mensaje_pulsar_avisos = objAvisosEnvio
+  console.log('Mensaje pulsar avisos ==>  ' + JSON.stringify(mensaje_pulsar_avisos))
+  avisosPulsar = mensaje_pulsar_avisos.avisos
+  console.log('Datos avisosPulsar  => ' + JSON.stringify(avisosPulsar))
 
-      let objAvisos = { "idAviso": mensaje_pulsar_avisos.idAviso, "archivoPdf": avisosPulsar.archivoPdf }
+  let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
 
-      const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
-      console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
-
-      const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
-      const responseTokenD = await getToken(API_URL_TOKEN)
-      const responseToken = JSON.parse(responseTokenD)
-      console.log("Response Token ======> " + JSON.stringify(responseToken))
-      const tokenRespuesta = responseToken.token
-      arrDispositivos = []
-
-      const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-      console.log('Dispositivos Avisos =>  '+ JSON.stringify(response))
-
-      listaDispositivos = JSON.parse(response)    
-      console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
-      if (listaDispositivos?.mensajes[0]?.codigo === 1) {
-        arrDispositivos = listaDispositivos.dispositivos
-        console.log(arrDispositivos)
-        console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
-        console.log('  AVISOS arrDispositivos  Datos----- '+ JSON.stringify(arrDispositivos))
-
-        if (arrDispositivos.length > 0) {
-          arrDispositivos.forEach(element => {
-            modeloNoti = element
-            console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
-
-            console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
-            if (modeloNoti.webId != null) {
-              if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                if (!mensajeNotificacionPulsar.envio_socket) {
-                  console.log('ENVIANDO NOTIFICAION PARA WEB')
-                  envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
-                }
-              }
-            } else {
-              if (modeloNoti.imei != '') {
-                console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
-                if (modeloNoti.descripcionEstado == 'ACTIVO') {
-                  if (!mensajeNotificacionPulsar.envio_socket) {
-                    envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
-                    envioPhoneMensajeria.tipo = "avisos";
-                    console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
-                    console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)                  
-                    const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
-                    console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
-                    envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
-                    envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
-                    envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
-                    console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
-                    enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
-                  }
-                }
-              }
-            }
-          })
-        } else {
-          console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
-        }
-      } else {
-        console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
-      }
-}
-
-
-// FUNCION PARA ENVIAR MENSAJERIA PUSH
-async function mensajeriaEnvioPush(objMensajeria){
-  mensajeriaPulsar = objMensajeria;
-  console.log("Mensajeria Pulsar", " ==>  " +  JSON.stringify(mensajeriaPulsar));
-  const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
+  const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
+  console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
 
   const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
   const responseTokenD = await getToken(API_URL_TOKEN)
   const responseToken = JSON.parse(responseTokenD)
-  console.log("Response Token ======> " + JSON.stringify(responseToken))
+  console.log('Response Token ======> ' + JSON.stringify(responseToken))
   const tokenRespuesta = responseToken.token
   arrDispositivos = []
 
   const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
+  console.log('Dispositivos Avisos =>  ' + JSON.stringify(response))
 
   listaDispositivos = JSON.parse(response)
-  if(listaDispositivos?.mensajes[0]?.codigo === 1){
-    console.log(" listaDispositivos.transaccion " + listaDispositivos.transaccion + "  listaDispositivos.mensaje " +  JSON.stringify(listaDispositivos.mensajes) );
+  console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
+  if (listaDispositivos?.mensajes[0]?.codigo === 1) {
     arrDispositivos = listaDispositivos.dispositivos
-    console.log(" mensajeria arrDispositivos.length => "+ arrDispositivos.length);
-    console.log(" mensajeria push arrDispositivos => " + JSON.stringify(arrDispositivos) );
-    if (arrDispositivos.length > 0) {      
+    console.log(arrDispositivos)
+    console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
+    console.log('  AVISOS arrDispositivos  Datos----- ' + JSON.stringify(arrDispositivos))
+
+    if (arrDispositivos.length > 0) {
       arrDispositivos.forEach(element => {
         modeloNoti = element
+        console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
+
+        console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
         if (modeloNoti.webId != null) {
           if (modeloNoti.descripcionEstado == 'ACTIVO') {
             if (!mensajeNotificacionPulsar.envio_socket) {
-              envioNotificacion(modeloNoti.endPointWeb,modeloNoti.keyWeb,modeloNoti.authWeb,mensajeriaPulsar.cabecera,mensajeriaPulsar.cuerpo,'Ir a mensajeria')                      
+              console.log('ENVIANDO NOTIFICAION PARA WEB')
+              envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
             }
           }
         } else {
           if (modeloNoti.imei != '') {
+            console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
               if (!mensajeNotificacionPulsar.envio_socket) {
-                envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
-                envioPhoneMensajeria.tipo = "mensajeria"
-                console.log(' MensajeriaPush mensaje notificacion Datos ==>  '+ JSON.stringify(envioPhoneMensajeria))                
-                console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + " Nombre del dispositivo " + modeloNoti.nombreDispositivo);
-                const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
-                console.log("Envio mensajeria push => "+ JSON.stringify(envioPhoneMensajeria) , " String_IMEI-NIT ==> " + strNitImei);
-                console.log("Mensaje Mensajeria => Cabezera ==> " + mensajeriaPulsar.cabecera + " Mensaje - Cuerpo  ==> " + mensajeriaPulsar.cuerpo);
-                envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera;
-                envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo;
-                console.log(" envioPhoneMensajeria ==> " + JSON.stringify(envioPhoneMensajeria));
+                envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
+                envioPhoneMensajeria.tipo = 'avisos'
+                console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+                console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)
+                const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
+                console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
+                envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
+                envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
+                envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
+                console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
               }
             }
@@ -387,28 +332,85 @@ async function mensajeriaEnvioPush(objMensajeria){
       })
     } else {
       console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
-    }  
-  }else {
-    console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion); 
+    }
+  } else {
+    console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
+  }
+}
+
+// FUNCION PARA ENVIAR MENSAJERIA PUSH
+async function mensajeriaEnvioPush(objMensajeria) {
+  mensajeriaPulsar = objMensajeria
+  console.log('Mensajeria Pulsar', ' ==>  ' + JSON.stringify(mensajeriaPulsar))
+  const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/${mensajeriaPulsar.nit}`
+
+  const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
+  const responseTokenD = await getToken(API_URL_TOKEN)
+  const responseToken = JSON.parse(responseTokenD)
+  console.log('Response Token ======> ' + JSON.stringify(responseToken))
+  const tokenRespuesta = responseToken.token
+  arrDispositivos = []
+
+  const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
+
+  listaDispositivos = JSON.parse(response)
+  if (listaDispositivos?.mensajes[0]?.codigo === 1) {
+    console.log(' listaDispositivos.transaccion ' + listaDispositivos.transaccion + '  listaDispositivos.mensaje ' + JSON.stringify(listaDispositivos.mensajes))
+    arrDispositivos = listaDispositivos.dispositivos
+    console.log(' mensajeria arrDispositivos.length => ' + arrDispositivos.length)
+    console.log(' mensajeria push arrDispositivos => ' + JSON.stringify(arrDispositivos))
+    if (arrDispositivos.length > 0) {
+      arrDispositivos.forEach(element => {
+        modeloNoti = element
+        if (modeloNoti.webId != null) {
+          if (modeloNoti.descripcionEstado == 'ACTIVO') {
+            if (!mensajeNotificacionPulsar.envio_socket) {
+              envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, 'Ir a mensajeria')
+            }
+          }
+        } else {
+          if (modeloNoti.imei != '') {
+            if (modeloNoti.descripcionEstado == 'ACTIVO') {
+              if (!mensajeNotificacionPulsar.envio_socket) {
+                envioPhoneMensajeria.idNotificacion = mensajeriaPulsar.idMensaje
+                envioPhoneMensajeria.tipo = 'mensajeria'
+                console.log(' MensajeriaPush mensaje notificacion Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+                console.log(' mensajeria.nit ' + mensajeriaPulsar.nit + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)
+                const strNitImei = mensajeriaPulsar.nit + '-' + modeloNoti.imei
+                console.log('Envio mensajeria push => ' + JSON.stringify(envioPhoneMensajeria), ' String_IMEI-NIT ==> ' + strNitImei)
+                console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeriaPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeriaPulsar.cuerpo)
+                envioPhoneMensajeria.cabezera = mensajeriaPulsar.cabecera
+                envioPhoneMensajeria.cuerpo = mensajeriaPulsar.cuerpo
+                console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
+                enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+              }
+            }
+          }
+        }
+      })
+    } else {
+      console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
+    }
+  } else {
+    console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
   }
 }
 
 //  ***************************** Muestra las IPS de RED *****************
-const networkInterfaces = os.networkInterfaces();
-console.log( " NetworkInterfaces ==> " , JSON.stringify(networkInterfaces))
+const networkInterfaces = os.networkInterfaces()
+console.log(' NetworkInterfaces ==> ', JSON.stringify(networkInterfaces))
 
 httpServer.listen(process.env.PORT, () => {
   console.log('Servidor a la espera de conexion ', config.PORT)
-  
 })
 
 /**
-  * @author GaryMorga
-  * @description DTOS Función para enviar la notificación 
-*/
-async function envioNotificacion(endPointWeb,keyWeb,authWeb,cabecera,cuerpo,mensajeNotificacionTitulo,objEnvioNotificacion,tipo) {
+ * @author GaryMorga
+ * @description DTOS Función para enviar la notificación
+ */
+async function envioNotificacion(endPointWeb, keyWeb, authWeb, cabecera, cuerpo, mensajeNotificacionTitulo, objEnvioNotificacion, tipo) {
   let urlPDF = ''
-  var varNotificacion = true;
+  var varNotificacion = true
   urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria/true`
   if (tipo === 'notificacion') {
     urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/notificaciones/${objEnvioNotificacion.idNotificacion}/${objEnvioNotificacion.archivoAduntoId}/${objEnvioNotificacion.estadoId}/${objEnvioNotificacion.actoadministrativo}/${varNotificacion}`
@@ -418,7 +420,7 @@ async function envioNotificacion(endPointWeb,keyWeb,authWeb,cabecera,cuerpo,mens
     console.log('Url_PDF Avisos =>  ', urlPDF)
   } else {
     urlPDF = `${config.URL_WEB_NOTIFICACION}/notificaciones/con/mensajeria`
-    console.log("Ruta_Mensajeria " , urlPDF);
+    console.log('Ruta_Mensajeria ', urlPDF)
   }
   const pushSubscription = {
     endpoint: endPointWeb,
@@ -452,7 +454,8 @@ async function envioNotificacion(endPointWeb,keyWeb,authWeb,cabecera,cuerpo,mens
     }
   }
 
-  webpush.sendNotification(pushSubscription, JSON.stringify(payload))
+  webpush
+    .sendNotification(pushSubscription, JSON.stringify(payload))
     .then(res => {
       console.log('Enviado Mensaje !!')
     })
@@ -498,7 +501,7 @@ app.use(express.urlencoded({ extended: false }))
 //* Ruta que usa async/await para el envio de informacion MENSAJERIA
 app.post('/envio/mensajeria', async (req, res) => {
   try {
-    console.log("Datos de mensajeria")
+    console.log('Datos de mensajeria')
     console.log(req.body)
     mensajeriaEnvioPush(req.body)
     res.status(200).json({
@@ -509,7 +512,7 @@ app.post('/envio/mensajeria', async (req, res) => {
           descripcion: 'Se envio de forma correcta el mensaje.'
         }
       ]
-    }) 
+    })
   } catch (error) {
     res.status(200).json({
       transaccion: false,
@@ -519,13 +522,13 @@ app.post('/envio/mensajeria', async (req, res) => {
           descripcion: 'Error envio mensajeria.'
         }
       ]
-    }) 
+    })
   }
-});
+})
 
 app.post('/envio/notificacion', async (req, res) => {
   try {
-    console.log("Datos de Notificacion")
+    console.log('Datos de Notificacion')
     console.log(req.body)
     await notificacionEnvioPush(req.body)
     res.status(200).json({
@@ -536,7 +539,7 @@ app.post('/envio/notificacion', async (req, res) => {
           descripcion: 'Se envio de forma correcta la notificacion.'
         }
       ]
-    }) 
+    })
   } catch (error) {
     res.status(200).json({
       transaccion: false,
@@ -546,13 +549,13 @@ app.post('/envio/notificacion', async (req, res) => {
           descripcion: 'Error envio notificacion.'
         }
       ]
-    }) 
+    })
   }
-});
+})
 
 app.post('/envio/avisos', async (req, res) => {
   try {
-    console.log("Datos de avisos")
+    console.log('Datos de avisos')
     console.log(req.body)
     mensajeriaEnvioAvisos(req.body)
     res.status(200).json({
@@ -563,7 +566,7 @@ app.post('/envio/avisos', async (req, res) => {
           descripcion: 'Se envio de forma correcta el aviso.'
         }
       ]
-    }) 
+    })
   } catch (error) {
     res.status(200).json({
       transaccion: false,
@@ -573,9 +576,9 @@ app.post('/envio/avisos', async (req, res) => {
           descripcion: 'Error envio aviso.'
         }
       ]
-    }) 
+    })
   }
-});
+})
 // const indexRoutes = require('./routes/test.routes')
 app.use(indexRoutes)
 
