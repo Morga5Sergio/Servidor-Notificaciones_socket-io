@@ -4,20 +4,12 @@ const { Schema } = mongoose
 
 const NotificacionesPushSchema = new Schema(
   {
-    usuario_registro_id: Number,
-    usuario_ultima_modificacion_id: Number,
+    _id: Object,
     cabecera: String,
     cuerpo: String,
-    enlace: String,
-    imagen: String,
     origen: String,
-    id_notificacion: String,
     cantidad_lectura: Number,
     nit: String,
-    fecha_registro: Date,
-    fecha_ultima_modificacion: Date,
-    estado_id: String,
-    envio_socket: Boolean 
   },
   {
     timestamps: true,
