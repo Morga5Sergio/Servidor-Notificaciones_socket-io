@@ -1,7 +1,9 @@
+import { consultarAvisosPush } from '..';
 import NotificacionesPush from '../models/NotificacionesPush'
 
 export const helloWorld = async (req, res) => {
   try {
+    await consultarAvisosPush("1020703023")
     const clientIp = req.ip; // Obtiene la dirección IP del cliente
     return res.send('Tu dirección IP es: ' + clientIp);
   } catch (error) {

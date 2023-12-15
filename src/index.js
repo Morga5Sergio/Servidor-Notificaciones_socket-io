@@ -1,6 +1,10 @@
 import NotificacionesPush from '../src/models/NotificacionesPush'
 import SadNotNotificacionesModel from '../src/models/sad_not_notificaciones'  
 import SadNotNotificacionesPushModel from '../src/models/sad_not_notificaciones_push'
+import SadNotAvisosModel from './models/sad_not_avisos'
+import SadNotAvisosPushModel from './models/sad_not_avisos_push'
+import SadNotMensajeriaModel from './models/sad_not_mensajeria'
+import SadNotMensajeriaPushModel from './models/sad_not_mensajeria_push'
 import indexRoutes from './routes/test.routes'
 require('dotenv').config()
 const { Client } = require('pulsar-client')
@@ -43,6 +47,8 @@ let notificacionElectronica = require('./models/notificaciones_electronicas_mode
 let arrayNotificacionMongo = require('./models/sad_notificaciones_modelo_mongo_array')
 let notificacionMongo = require('./models/sad_notificaciones_modelo_mongo')
 let arrayNotificacionPushMongo = require('./models/sad_notificaciones_push_mongo_array')
+let arrayAvisosPushMongo = require('./models/sad_avisos_push_mongo_array')
+let arrayMensajeriaPushMongo = require('./models/sad_mensajeria_push_mongo_array')
 let notificacionPushMongo = require('./models/sad_notificaciones_push_mongo_array')
 // 
 
@@ -191,6 +197,87 @@ async function consultarNotificacionesPush (nroDocumentoNit){
 
     }) */
 }
+
+export async function consultarAvisosPush(nroDocumentoNit) {
+  arrayAvisosPushMongo = await SadNotAvisosPushModel.find({ nit: nroDocumentoNit})
+
+  const data = arrayAvisosPushMongo[0].cuerpo
+
+  // for (const notPush of arrayNotificacionPushMongo) {
+  //   console.log('Entra Array ' + notPush)
+
+  //   const notificacionMongo = await SadNotNotificacionesModel.find({ _id: new ObjectId(notPush.id_notificacion) })
+  //   //notificacionMongo = JSON.stringify(notificacionMongo);
+  //   console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo)
+  //   console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo[0].acto_administrativo)
+  //   notificaciones_electronicas.actoAdministrativo = notificacionMongo[0].acto_administrativo
+  //   notificaciones_electronicas.archivoAdjuntoActuadoId = notificacionMongo[0].archivo_adjunto_actuado_id
+  //   notificaciones_electronicas.estadoNotificacionElectronicaId = notificacionMongo[0].estado_notificacion_electronica_id
+  //   notificaciones_electronicas.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+  //   notificaciones_electronicas.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+  //   notificaciones_electronicas.fechaRegistro = notificacionMongo[0].fecha_registro
+  //   notificaciones_electronicas.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
+
+  //   // Armar la notificacion para el envio
+  //   notificacionEnvio.notificacionPushId = notPush._id
+  //   notificacionEnvio.idNotificacion = notPush.id_notificacion
+  //   notificacionEnvio.cabecera = notPush.cabecera
+  //   notificacionEnvio.cuerpo = notPush.cuerpo
+  //   notificacionEnvio.origen = notPush.origen
+  //   notificacionEnvio.cantidadLectura = notPush.cantidad_lectura
+  //   notificacionEnvio.nit = notPush.nit
+  //   notificacionEnvio.notificacionesElectronicas = notificaciones_electronicas
+  //   notificacionEnvio.envio_socket = notPush.envio_socket
+  //   notificacionEnvio.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+  //   notificacionEnvio.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+  //   notificacionEnvio.fechaRegistro = notificacionMongo[0].fecha_registro
+  //   notificacionEnvio.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
+
+  //   console.log('MorgaGarySergio', ' ===> sdfds ', notificacionEnvio)
+  //   await notificacionEnvioPush(notificacionEnvio)
+  // }
+}
+
+export async function consultarMensajeriaPush(nroDocumentoNit) {
+  arrayMensajeriaPushMongo = await SadNotMensajeriaPushModel.find({ nit: nroDocumentoNit })
+
+  const data = arrayMensajeriaPushMongo[0].cuerpo
+
+  // for (const notPush of arrayNotificacionPushMongo) {
+  //   console.log('Entra Array ' + notPush)
+
+  //   const notificacionMongo = await SadNotNotificacionesModel.find({ _id: new ObjectId(notPush.id_notificacion) })
+  //   //notificacionMongo = JSON.stringify(notificacionMongo);
+  //   console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo)
+  //   console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo[0].acto_administrativo)
+  //   notificaciones_electronicas.actoAdministrativo = notificacionMongo[0].acto_administrativo
+  //   notificaciones_electronicas.archivoAdjuntoActuadoId = notificacionMongo[0].archivo_adjunto_actuado_id
+  //   notificaciones_electronicas.estadoNotificacionElectronicaId = notificacionMongo[0].estado_notificacion_electronica_id
+  //   notificaciones_electronicas.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+  //   notificaciones_electronicas.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+  //   notificaciones_electronicas.fechaRegistro = notificacionMongo[0].fecha_registro
+  //   notificaciones_electronicas.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
+
+  //   // Armar la notificacion para el envio
+  //   notificacionEnvio.notificacionPushId = notPush._id
+  //   notificacionEnvio.idNotificacion = notPush.id_notificacion
+  //   notificacionEnvio.cabecera = notPush.cabecera
+  //   notificacionEnvio.cuerpo = notPush.cuerpo
+  //   notificacionEnvio.origen = notPush.origen
+  //   notificacionEnvio.cantidadLectura = notPush.cantidad_lectura
+  //   notificacionEnvio.nit = notPush.nit
+  //   notificacionEnvio.notificacionesElectronicas = notificaciones_electronicas
+  //   notificacionEnvio.envio_socket = notPush.envio_socket
+  //   notificacionEnvio.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+  //   notificacionEnvio.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+  //   notificacionEnvio.fechaRegistro = notificacionMongo[0].fecha_registro
+  //   notificacionEnvio.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
+
+  //   console.log('MorgaGarySergio', ' ===> sdfds ', notificacionEnvio)
+  //   await notificacionEnvioPush(notificacionEnvio)
+  // }
+}
+
 
 // CASO Segundo ==> Mongo para notificaciones
     /* arrayNotificacionMongo = await SadNotNotificacionesModel.find({nit :nroDocumentoNit})

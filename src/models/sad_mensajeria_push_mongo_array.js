@@ -1,0 +1,22 @@
+let sadAvisosModeloMongoPush = {
+  _id: '',
+  usuario_registro_id: 0,
+  usuario_ultima_modificacion_id: 0,
+  cabecera: '',
+  cuerpo: '',
+  enlace: null,
+  imagen: null,
+  origen: '',
+  id_mensaje: "",
+  cantidad_lectura: 0,
+  nit: '',
+  fecha_registro: '',
+  fecha_ultima_modificacion: '',
+  estado_id: 'AC'
+}
+
+// Crear un array con el modelo
+let arrayMensajeriaPush = [sadAvisosModeloMongoPush];
+
+module.exports = arrayMensajeriaPush;
+
