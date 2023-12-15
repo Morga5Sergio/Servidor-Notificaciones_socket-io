@@ -114,6 +114,8 @@ io.on('connection', socket => {
     // console.log(' Mensaje entrante==>  ', JSON.stringify(nroDocumentoNit))
     console.log(' Mensaje entrante  ' + nroDocumentoNit)
     await consultarNotificacionesPush (nroDocumentoNit)
+    //await consultarAvisosPush(nroDocumentoNit)
+    //await consultarMensajeriaPush(nroDocumentoNit)
   })
 
 })
