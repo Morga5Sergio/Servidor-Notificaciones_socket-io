@@ -14,7 +14,7 @@ let avisos_electronicas_dto = {
   origen: '',
   cantidadLectura: 0,
   nit: '',
-  avisos: avisos,
+  avisos: {},
   envioSocket: false,
   usuarioRegistroId: 0,
   usuarioUltimaModificacionId: 0,
