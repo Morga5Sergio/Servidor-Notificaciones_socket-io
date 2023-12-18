@@ -1,4 +1,3 @@
-import NotificacionesPush from '../src/models/NotificacionesPush'
 import SadNotNotificacionesModel from '../src/models/sad_not_notificaciones'  
 import SadNotNotificacionesPushModel from '../src/models/sad_not_notificaciones_push'
 import SadNotAvisosModel from './models/sad_not_avisos'
