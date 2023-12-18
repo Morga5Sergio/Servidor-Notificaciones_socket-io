@@ -111,8 +111,8 @@ io.on('connection', socket => {
   socket.on('reenviar', async nroDocumentoNit => {
     // console.log(' Mensaje entrante==>  ', JSON.stringify(nroDocumentoNit))
     console.log(' Mensaje entrante  ' + nroDocumentoNit)
-    await consultarNotificacionesPush (nroDocumentoNit)
-    //await consultarAvisosPush(nroDocumentoNit)
+    //await consultarNotificacionesPush (nroDocumentoNit)
+    await consultarAvisosPush(nroDocumentoNit)
     //await consultarMensajeriaPush(nroDocumentoNit)
   })
 
@@ -232,8 +232,8 @@ export async function consultarAvisosPush(nroDocumentoNit) {
     avisos_electronicas_dto.estadoId = avisPush.estado_id
 
 
-    console.log('MorgaGarySergio', ' ===> sdfds ', avisos_electronicas_dto)
-    await notificacionEnvioPush(avisos_electronicas_dto)
+    console.log('MorgaGarySergio', ' ===> Reenvio de avisos ', avisos_electronicas_dto)
+    await mensajeriaEnvioAvisos(avisos_electronicas_dto)
   }
 }
 
@@ -384,7 +384,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
       console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
     }
   } catch (error) {
-    console.error('Error Final :', error.message)
+    console.error('Error Final Notificacion :', error.message)
   }
 }  
 
@@ -508,6 +508,8 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio) {
           console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
 
           console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
+
+          console.log('============== Estado Socket =============== ' + mensaje_pulsar_avisos.envio_socket)
 
           if (modeloNoti.webId != null && modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
             console.log('ENVIANDO NOTIFICACION PARA WEB')
