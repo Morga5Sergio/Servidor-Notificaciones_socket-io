@@ -472,75 +472,144 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 // FUNCION PARA ENVIAR AVISOS PUSH
 
 async function mensajeriaEnvioAvisos(objAvisosEnvio) {
-  mensaje_pulsar_avisos = objAvisosEnvio
-  console.log('Mensaje pulsar avisos ==>  ' + JSON.stringify(mensaje_pulsar_avisos))
-  avisosPulsar = mensaje_pulsar_avisos.avisos
-  console.log('Datos avisosPulsar  => ' + JSON.stringify(avisosPulsar))
+  try {
+    mensaje_pulsar_avisos = objAvisosEnvio
+    console.log('Mensaje pulsar avisos ==>  ' + JSON.stringify(mensaje_pulsar_avisos))
+    avisosPulsar = mensaje_pulsar_avisos.avisos
+    console.log('Datos avisosPulsar  => ' + JSON.stringify(avisosPulsar))
 
-  let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
+    let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
 
-  const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
-  console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
+    const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
+    console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
 
-  const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
-  const responseTokenD = await getToken(API_URL_TOKEN)
-  const responseToken = JSON.parse(responseTokenD)
-  console.log('Response Token ======> ' + JSON.stringify(responseToken))
-  const tokenRespuesta = responseToken.token
-  arrDispositivos = []
+    const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
+    const responseTokenD = await getToken(API_URL_TOKEN)
+    const responseToken = JSON.parse(responseTokenD)
+    console.log('Response Token ======> ' + JSON.stringify(responseToken))
+    const tokenRespuesta = responseToken.token
+    arrDispositivos = []
 
-  const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
-  console.log('Dispositivos Avisos =>  ' + JSON.stringify(response))
+    const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
+    console.log('Dispositivos Avisos =>  ' + JSON.stringify(response))
 
-  listaDispositivos = JSON.parse(response)
-  console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
-  if (listaDispositivos?.mensajes[0]?.codigo === 1) {
-    arrDispositivos = listaDispositivos.dispositivos
-    console.log(arrDispositivos)
-    console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
-    console.log('  AVISOS arrDispositivos  Datos----- ' + JSON.stringify(arrDispositivos))
+    listaDispositivos = JSON.parse(response)
+    console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
 
-    if (arrDispositivos.length > 0) {
-      arrDispositivos.forEach(element => {
-        modeloNoti = element
-        console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
+    if (listaDispositivos?.mensajes[0]?.codigo === 1) {
+      arrDispositivos = listaDispositivos.dispositivos
+      console.log(arrDispositivos)
+      console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
+      console.log('  AVISOS arrDispositivos  Datos----- ' + JSON.stringify(arrDispositivos))
 
-        console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
-        if (modeloNoti.webId != null) {
-          if (modeloNoti.descripcionEstado == 'ACTIVO') {
-            if (!mensajeNotificacionPulsar.envio_socket) {
-              console.log('ENVIANDO NOTIFICAION PARA WEB')
-              envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
-            }
-          }
-        } else {
-          if (modeloNoti.imei != '') {
+      if (arrDispositivos.length > 0) {
+        for (const element of arrDispositivos) {
+          modeloNoti = element
+          console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
+
+          console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
+
+          if (modeloNoti.webId != null && modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
+            console.log('ENVIANDO NOTIFICACION PARA WEB')
+            envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
+          } else if (modeloNoti.imei !== '' && modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
             console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
-            if (modeloNoti.descripcionEstado == 'ACTIVO') {
-              if (!mensajeNotificacionPulsar.envio_socket) {
-                envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
-                envioPhoneMensajeria.tipo = 'avisos'
-                console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
-                console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)
-                const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
-                console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
-                envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
-                envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
-                envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
-                console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
-                enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
-              }
-            }
+            envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
+            envioPhoneMensajeria.tipo = 'avisos'
+            console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+            console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)
+            const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
+            console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
+            envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
+            envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
+            envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
+            console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
+            enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
           }
         }
-      })
+      } else {
+        console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
+      }
     } else {
-      console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
+      console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
     }
-  } else {
-    console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
+  } catch (error) {
+    console.error('Ocurrió un error:', error)
   }
 }
+
+
+
+// async function mensajeriaEnvioAvisos(objAvisosEnvio) {
+//   mensaje_pulsar_avisos = objAvisosEnvio
+//   console.log('Mensaje pulsar avisos ==>  ' + JSON.stringify(mensaje_pulsar_avisos))
+//   avisosPulsar = mensaje_pulsar_avisos.avisos
+//   console.log('Datos avisosPulsar  => ' + JSON.stringify(avisosPulsar))
+
+//   let objAvisos = { idAviso: mensaje_pulsar_avisos.idAviso, archivoPdf: avisosPulsar.archivoPdf }
+
+//   const API_URL_Lista_Usuario = `${config.BACK_MENSAJERIA}/api/dispositivo/buscarXNit/` + mensaje_pulsar_avisos.nit
+//   console.log(' URL Lista De Usuario entrando al CONSUMER ==>  ', API_URL_Lista_Usuario)
+
+//   const API_URL_TOKEN = `${config.TOKEN_GENERICO}/token/getGenerico/1000`
+//   const responseTokenD = await getToken(API_URL_TOKEN)
+//   const responseToken = JSON.parse(responseTokenD)
+//   console.log('Response Token ======> ' + JSON.stringify(responseToken))
+//   const tokenRespuesta = responseToken.token
+//   arrDispositivos = []
+
+//   const response = await getListaDeUsuarioDispositivos(tokenRespuesta, API_URL_Lista_Usuario)
+//   console.log('Dispositivos Avisos =>  ' + JSON.stringify(response))
+
+//   listaDispositivos = JSON.parse(response)
+//   console.log('  dispositivo- transaccion ' + JSON.stringify(listaDispositivos.transaccion) + '  dispositivo- mensaje ' + listaDispositivos.mensaje)
+//   if (listaDispositivos?.mensajes[0]?.codigo === 1) {
+//     arrDispositivos = listaDispositivos.dispositivos
+//     console.log(arrDispositivos)
+//     console.log('  AVISOS arrDispositivos  Longitud----- ' + arrDispositivos.length)
+//     console.log('  AVISOS arrDispositivos  Datos----- ' + JSON.stringify(arrDispositivos))
+
+//     if (arrDispositivos.length > 0) {
+//       arrDispositivos.forEach(element => {
+//         modeloNoti = element
+//         console.log(' Elemento AVISO => ' + JSON.stringify(modeloNoti))
+
+//         console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
+//         if (modeloNoti.webId != null) {
+//           if (modeloNoti.descripcionEstado == 'ACTIVO') {
+//             if (!mensajeNotificacionPulsar.envio_socket) {
+//               console.log('ENVIANDO NOTIFICAION PARA WEB')
+//               envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
+//             }
+//           }
+//         } else {
+//           if (modeloNoti.imei != '') {
+//             console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
+//             if (modeloNoti.descripcionEstado == 'ACTIVO') {
+//               if (!mensajeNotificacionPulsar.envio_socket) {
+//                 envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
+//                 envioPhoneMensajeria.tipo = 'avisos'
+//                 console.log(' Mensaje_AVISOS_Datos ==>  ' + JSON.stringify(envioPhoneMensajeria))
+//                 console.log(' avisos_nit ' + mensaje_pulsar_avisos.nit + ' ===> ' + ' Nombre del dispositivo ' + modeloNoti.nombreDispositivo)
+//                 const strNitImei = mensaje_pulsar_avisos.nit + '-' + modeloNoti.imei
+//                 console.log('Mensaje Mensajeria => Cabezera ==> ' + mensaje_pulsar_avisos.cabecera + ' Mensaje - Cuerpo  ==> ' + mensaje_pulsar_avisos.cuerpo)
+//                 envioPhoneMensajeria.cabezera = mensaje_pulsar_avisos.cabecera
+//                 envioPhoneMensajeria.cuerpo = mensaje_pulsar_avisos.cuerpo
+//                 envioPhoneMensajeria.archivoPdf = objAvisos.archivoPdf
+//                 console.log(' envioPhoneMensajeria ==> ' + JSON.stringify(envioPhoneMensajeria))
+//                 enviarMensajeNotificacionSocket(strNitImei, envioPhoneMensajeria)
+//               }
+//             }
+//           }
+//         }
+//       })
+//     } else {
+//       console.log(' No se han encontrado una lista de dispositivos en el NIT Correspondiente ')
+//     }
+//   } else {
+//     console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
+//   }
+// }
 
 // FUNCION PARA ENVIAR MENSAJERIA PUSH
 async function mensajeriaEnvioPush(objMensajeria) {
