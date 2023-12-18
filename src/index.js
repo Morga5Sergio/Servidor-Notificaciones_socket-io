@@ -30,8 +30,7 @@ webpush.setVapidDetails('mailto:example@yourdomain.org', vapidKeys.publicKey, va
  * @description DTOS para mensajeria
  */
 let mensajeriaPulsar = require('./models/mensaje_pulsar')
-let envioPhoneMensajeria = { idNotificacion: '', tipo: '', cabezera: '', cuerpo: '', archivoAdjuntoActuadoId: '', estadoNotificacionElectronicoId: '', archivoPdf: '' }
-
+let envioPhoneMensajeria = { idNotificacion: '', tipo: '', cabezera: '', cuerpo: '', archivoAdjuntoActuadoId: '', estadoNotificacionElectronicoId: '', archivoPdf: '', actoAdministrativo:''}
 /**
  * @author GaryMorga
  * @description DTOS para notificación
@@ -369,8 +368,9 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
             cabezera: mensajeNotificacionPulsar.cabecera,
             cuerpo: mensajeNotificacionPulsar.cuerpo,
             archivoAdjuntoActuadoId: objEnvioNotificacion.archivoAduntoId,
-            estadoNotificacionElectronicoId: mensajeNotificacionPulsar.estadoNotificacion
-          }
+            estadoNotificacionElectronicoId: mensajeNotificacionPulsar.estadoNotificacion,
+            actoAdministrativo: objEnvioNotificacion.actoadministrativo
+          }        
           console.log(' NIT-IMEI ===> ' + mensajeNotificacionPulsar.nit + ' nombre del dispositivo ' + modeloNoti.nombreDispositivo)
           console.log(' Envio_Socket_datos =>  ', JSON.stringify(envioPhoneMensajeria))
           console.log('Mensaje Mensajeria => Cabezera ==> ' + mensajeNotificacionPulsar.cabecera + ' Mensaje - Cuerpo  ==> ' + mensajeNotificacionPulsar.cuerpo)
@@ -386,7 +386,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
   } catch (error) {
     console.error('Error Final :', error.message)
   }
-}
+}  
 
 // FUNCIÓN PARA ENVIAR NOTIFICACIONES PUSH
 // async function notificacionEnvioPush(ObjetoNotificaionPush){
