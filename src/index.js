@@ -111,8 +111,8 @@ io.on('connection', socket => {
   socket.on('reenviar', async nroDocumentoNit => {
     // console.log(' Mensaje entrante==>  ', JSON.stringify(nroDocumentoNit))
     console.log(' Mensaje entrante  ' + nroDocumentoNit)
-    await consultarNotificacionesPush (nroDocumentoNit)
-    //await consultarAvisosPush(nroDocumentoNit)
+    //await consultarNotificacionesPush (nroDocumentoNit)
+    await consultarAvisosPush(nroDocumentoNit)
     //await consultarMensajeriaPush(nroDocumentoNit)
   })
 
@@ -232,8 +232,8 @@ export async function consultarAvisosPush(nroDocumentoNit) {
     avisos_electronicas_dto.estadoId = avisPush.estado_id
 
 
-    console.log('MorgaGarySergio', ' ===> sdfds ', avisos_electronicas_dto)
-    await notificacionEnvioPush(avisos_electronicas_dto)
+    console.log('MorgaGarySergio', ' ===> Reenvio de avisos ', avisos_electronicas_dto)
+    await mensajeriaEnvioAvisos(avisos_electronicas_dto)
   }
 }
 
@@ -384,7 +384,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
       console.log(' Error del servicio ListDispositivos ' + listaDispositivos?.mensajes[0]?.descripcion)
     }
   } catch (error) {
-    console.error('Error Final :', error.message)
+    console.error('Error Final Notificacion :', error.message)
   }
 }  
 
@@ -507,7 +507,7 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio) {
 
         console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
         if (modeloNoti.webId != null) {
-          if (modeloNoti.descripcionEstado == 'ACTIVO') {
+          if (modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
             if (!mensajeNotificacionPulsar.envio_socket) {
               console.log('ENVIANDO NOTIFICAION PARA WEB')
               envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
@@ -516,7 +516,7 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio) {
         } else {
           if (modeloNoti.imei != '') {
             console.log('  avisos - IMEI ==> ' + modeloNoti.imei)
-            if (modeloNoti.descripcionEstado == 'ACTIVO') {
+            if (modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
               if (!mensajeNotificacionPulsar.envio_socket) {
                 envioPhoneMensajeria.idNotificacion = mensaje_pulsar_avisos.idAviso // Id Avisos
                 envioPhoneMensajeria.tipo = 'avisos'
