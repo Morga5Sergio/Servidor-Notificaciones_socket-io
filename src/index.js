@@ -121,93 +121,47 @@ io.on('connection', socket => {
 })
 
 // {nit:"1020703023", envio_socket:false}
-async function consultarNotificacionesPush (nroDocumentoNit){
-  
-  
-  console.log("DatosMorga", " ==> notificacionMongo ==>  " + notificacionMongo );
+export async function consultarNotificacionesPush(nroDocumentoNit) {
+  console.log('DatosMorga', ' ==> notificacionMongo ==>  ' + notificacionMongo)
 
-    // Caso Primero ==> Mongo para notificaciones_push
-    arrayNotificacionPushMongo = await SadNotNotificacionesPushModel.find({nit:nroDocumentoNit, envio_socket:false})
-    console.log("Notificaciones Push==> " + arrayNotificacionPushMongo.length )
-    console.log("Notificaciones Push==> " + arrayNotificacionPushMongo )
+  // Caso Primero ==> Mongo para notificaciones_push
+  arrayNotificacionPushMongo = await SadNotNotificacionesPushModel.find({ nit: nroDocumentoNit, envio_socket: false })
 
+  for (const notPush of arrayNotificacionPushMongo) {
+    console.log('Entra Array ' + notPush)
+    const notificacionMongo = await SadNotNotificacionesModel.find({ _id: new ObjectId(notPush.id_notificacion) })
+    //notificacionMongo = JSON.stringify(notificacionMongo);
+    console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo)
+    console.log('GaryMorgaDatos', ' ==>notificacionMongo  ', notificacionMongo[0].acto_administrativo)
+    notificaciones_electronicas.actoAdministrativo = notificacionMongo[0].acto_administrativo
+    notificaciones_electronicas.archivoAdjuntoActuadoId = notificacionMongo[0].archivo_adjunto_actuado_id
+    notificaciones_electronicas.estadoNotificacionElectronicaId = notificacionMongo[0].estado_notificacion_electronica_id
+    notificaciones_electronicas.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+    notificaciones_electronicas.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+    notificaciones_electronicas.fechaRegistro = notificacionMongo[0].fecha_registro
+    notificaciones_electronicas.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
 
-    for (const notPush of arrayNotificacionPushMongo) {
-      console.log("Entra Array " + notPush);
-      if(!notPush.envio_socket){
-        const notificacionMongo = await SadNotNotificacionesModel.find({ _id: new ObjectId(notPush.id_notificacion) });
-        //notificacionMongo = JSON.stringify(notificacionMongo); 
-        console.log("GaryMorgaDatos", " ==>notificacionMongo  " , notificacionMongo );
-        console.log("GaryMorgaDatos", " ==>notificacionMongo  " , notificacionMongo[0].acto_administrativo );
-        notificaciones_electronicas.actoAdministrativo =  notificacionMongo[0].acto_administrativo;
-        notificaciones_electronicas.archivoAdjuntoActuadoId = notificacionMongo[0].archivo_adjunto_actuado_id;
-        notificaciones_electronicas.estadoNotificacionElectronicaId = notificacionMongo[0].estado_notificacion_electronica_id;
-        notificaciones_electronicas.usuarioRegistroId = notificacionMongo[0].usuario_registro_id;
-        notificaciones_electronicas.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id;
-        notificaciones_electronicas.fechaRegistro = notificacionMongo[0].fecha_registro;
-        notificaciones_electronicas.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion;
-  
-        // Armar la notificacion para el envio 
-        notificacionEnvio.notificacionPushId = notPush._id;
-        notificacionEnvio.idNotificacion = notPush.id_notificacion;
-        notificacionEnvio.cabecera = notPush.cabecera;
-        notificacionEnvio.cuerpo = notPush.cuerpo;
-        notificacionEnvio.origen = notPush.origen;
-        notificacionEnvio.cantidadLectura = notPush.cantidad_lectura;
-        notificacionEnvio.nit  = notPush.nit;
-        notificacionEnvio.notificacionesElectronicas =  notificaciones_electronicas;
-        notificacionEnvio.envio_socket = notPush.envio_socket;
-        notificacionEnvio.usuarioRegistroId =  notificacionMongo[0].usuario_registro_id;
-        notificacionEnvio.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id;
-        notificacionEnvio.fechaRegistro = notificacionMongo[0].fecha_registro;
-        notificacionEnvio.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion;
-    
-        console.log("MorgaGarySergio", " ===> sdfds ", notificacionEnvio);
-        await notificacionEnvioPush(notificacionEnvio);
-      }else {
-        console.log("MorgaGarySergio", " Mensaje enviado notificaciones ");
-      }
+    // Armar la notificacion para el envio
+    notificacionEnvio.notificacionPushId = notPush._id
+    notificacionEnvio.idNotificacion = notPush.id_notificacion
+    notificacionEnvio.cabecera = notPush.cabecera
+    notificacionEnvio.cuerpo = notPush.cuerpo
+    notificacionEnvio.origen = notPush.origen
+    notificacionEnvio.cantidadLectura = notPush.cantidad_lectura
+    notificacionEnvio.nit = notPush.nit
+    notificacionEnvio.notificacionesElectronicas = notificaciones_electronicas
+    notificacionEnvio.envio_socket = notPush.envio_socket
+    notificacionEnvio.usuarioRegistroId = notificacionMongo[0].usuario_registro_id
+    notificacionEnvio.usuarioUltimaModificacionId = notificacionMongo[0].usuario_ultima_modificacion_id
+    notificacionEnvio.fechaRegistro = notificacionMongo[0].fecha_registro
+    notificacionEnvio.fechaUltimaModificacion = notificacionMongo[0].fecha_ultima_modificacion
+
+    console.log('MorgaGarySergio', ' ===> sdfds ', notificacionEnvio)
+    await notificacionEnvioPush(notificacionEnvio)
+    if (!notPush.envio_socket) {
       
-    }
-
-    // AVISO 
-
-    arrayAvisosPushMongo = await SadNotAvisosPushModel.find({ nit: nroDocumentoNit, envio_socket:false})
-
-  for (const avisPush of arrayAvisosPushMongo) {
-    console.log('Entra Array ' + avisPush)
-    console.log('Entra Array avisPush.envio_socket ==>  ' + avisPush.envio_socket)
-
-    if(!avisPush.envio_socket){
-      const avisosDtoMongo = await SadNotAvisosModel.find({ _id: new ObjectId(avisPush.id_aviso) })
-
-      avisos_dto.archivoPdf = avisosDtoMongo[0].archivo_pdf
-      avisos_dto.usuarioRegistroId = avisosDtoMongo[0].usuario_registro_id
-      avisos_dto.usuarioUltimaModificacionId = avisosDtoMongo[0].usuario_ultima_modificacion_id
-      avisos_dto.fechaRegistro = avisosDtoMongo[0].fecha_registro
-      avisos_dto.fechaUltimaModificacion = avisosDtoMongo[0].fecha_ultima_modificacion
-  
-      // Armar la notificacion para el envio
-      avisos_electronicas_dto.avisoPushId = avisPush.id_aviso
-      avisos_electronicas_dto.idAviso = avisPush.id_aviso
-      avisos_electronicas_dto.cabecera = avisPush.cabecera
-      avisos_electronicas_dto.cuerpo = avisPush.cuerpo
-      avisos_electronicas_dto.origen = avisPush.origen
-      avisos_electronicas_dto.cantidadLectura = avisPush.cantidad_lectura
-      avisos_electronicas_dto.nit = avisPush.nit
-      avisos_electronicas_dto.avisos = avisos_dto
-      avisos_electronicas_dto.envioSocket = avisPush.envio_socket
-      avisos_electronicas_dto.usuarioRegistroId = avisPush.usuario_registro_id
-      avisos_electronicas_dto.usuarioUltimaModificacionId = avisPush.usuario_ultima_modificacion_id
-      avisos_electronicas_dto.fechaRegistro = avisPush.fecha_registro
-      avisos_electronicas_dto.fechaUltimaModificacion = avisPush.fecha_ultima_modificacion
-      avisos_electronicas_dto.estadoId = avisPush.estado_id
-  
-  
-      console.log('MorgaGarySergio', ' ===> Reenvio de avisos ', avisos_electronicas_dto)
-      await mensajeriaEnvioAvisos(avisos_electronicas_dto)
-    }else {
-      console.log('MorgaGarySergio', ' ===> El mensaje ya sido enviado',)
+    } else {
+      console.log('MorgaGarySergio', ' Mensaje enviado notificaciones ')
     }
   }
 }
