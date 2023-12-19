@@ -113,7 +113,7 @@ io.on('connection', socket => {
   socket.on('reenviar', async nroDocumentoNit => {
     // console.log(' Mensaje entrante==>  ', JSON.stringify(nroDocumentoNit))
     console.log(' Mensaje entrante  ' + nroDocumentoNit)
-    // await consultarAvisosPush(nroDocumentoNit)
+    await consultarAvisosPush(nroDocumentoNit)
     await consultarNotificacionesPush (nroDocumentoNit)
     //await consultarMensajeriaPush(nroDocumentoNit)
   })
