@@ -3,7 +3,6 @@ const { Schema } = mongoose
  
 const SadNotMensajeriaPushSchema = new Schema(
   {
-    _id: Object,
     usuario_registro_id: Number,
     usuario_ultima_modificacion_id: Number,
     cabecera: String,
@@ -14,6 +13,7 @@ const SadNotMensajeriaPushSchema = new Schema(
     id_mensaje: String,
     cantidad_lectura: Number,
     nit: String,
+    envio_socket:Boolean,
     fecha_registro: Date,
     fecha_ultima_modificacion: Date,
     estado_id: String

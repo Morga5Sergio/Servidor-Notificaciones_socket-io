@@ -16,7 +16,8 @@ const SadNotAvisosPushSchema = new Schema(
     nit: String,
     fecha_registro: Date,
     fecha_ultima_modificacion: Date,
-    estado_id: String
+    estado_id: String,
+    envio_socket: Boolean
   },
   {
     timestamps: true,

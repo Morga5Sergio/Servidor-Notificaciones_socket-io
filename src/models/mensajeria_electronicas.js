@@ -1,26 +1,18 @@
-let avisos_dto = {
-  archivoPdf: '',
-  usuarioRegistroId: 0,
-  usuarioUltimaModificacionId: 0,
-  fechaRegistro: '',
-  fechaUltimaModificacion: ''
-}
-
-let avisos_electronicas_dto = {
-  avisoPushId: '',
-  idAviso: '',
+let mensajeria_electronicas = {
+  mensajePushId: '',
+  idMensaje: '',
   cabecera: '',
   cuerpo: '',
   origen: '',
   cantidadLectura: 0,
   nit: '',
+  envioSocket: false,
   usuarioRegistroId: 0,
   usuarioUltimaModificacionId: 0,
   fechaRegistro: '',
   fechaUltimaModificacion: '',
-  estadoId: '',
-  archivoPdf: '',
-  avisos: {}
+  estadoId: 'AC'
 }
 
-module.exports = { avisos_dto, avisos_electronicas_dto }
+module.exports = mensajeria_electronicas
+
