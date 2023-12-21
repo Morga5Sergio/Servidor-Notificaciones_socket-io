@@ -18,7 +18,9 @@ const config = require('../src/config')
 const os = require('os')
 const cors = require('cors')
 const { ObjectId } = require('mongodb');
-
+let swdisReemvio;
+let swdisReenvioAvisos;
+let swdisReemvioMensajeria;
 const vapidKeys = {
   publicKey: config.PUBLIC_KEY,
   privateKey: config.PRIVATE_KEY
@@ -124,7 +126,8 @@ io.on('connection', socket => {
 // {nit:"1020703023", envio_socket:false}
 export async function consultarNotificacionesPush(nroDocumentoNit) {
   console.log('DatosMorga', ' ==> notificacionMongo ==>  ' + notificacionMongo)
-
+  swdisReemvio = false;
+  
   // Caso Primero ==> Mongo para notificaciones_push
   arrayNotificacionPushMongo = await SadNotNotificacionesPushModel.find({ nit: nroDocumentoNit, envio_socket: false })
 try {
@@ -173,7 +176,8 @@ try {
 
 export async function consultarAvisosPush(nroDocumentoNit) {
   arrayAvisosPushMongo = await SadNotAvisosPushModel.find({ nit: nroDocumentoNit, envio_socket:false})
-
+  swdisReenvioAvisos = false;
+  
   try {
     for (const avisPush of arrayAvisosPushMongo) {
       console.log('Entra Array ' + avisPush)
@@ -221,7 +225,7 @@ export async function consultarAvisosPush(nroDocumentoNit) {
 export async function consultarMensajeriaPush(nroDocumentoNit) {
 
   const arrayMensajeriaPushMongoData = await SadNotMensajeriaPushModel.find({ nit: nroDocumentoNit, envio_socket: false })
-
+  swdisReemvioMensajeria = false;
   try {
     for (const mensPush of arrayMensajeriaPushMongoData) {
       console.log(mensPush)
@@ -266,9 +270,9 @@ async function enviarMensajeNotificacionSocket(datosNit, envioPhone) {
 }
 
 async function notificacionEnvioPush(ObjetoNotificaionPush) {
+  console.log("SWRENVIO ", " ==> ReenvioAvisos  " + swdisReemvio);
   
   try {
-
     console.log("garyMorga", " Envio de notificacion Reenvia  "  );
     const mensajeNotificacionPulsar = ObjetoNotificaionPush
     console.log('mensajeNotificacionRecivido ==>', JSON.stringify(mensajeNotificacionPulsar))
@@ -305,7 +309,8 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 
       for (const modeloNoti of arrDispositivos) {
         console.log('Notificacion Modelo Datos del dispositivo', modeloNoti)
-        if (modeloNoti.webId != null && modeloNoti.descripcionEstado === 'ACTIVO' && !mensajeNotificacionPulsar.envio_socket) {
+        if (modeloNoti.webId != null && modeloNoti.descripcionEstado === 'ACTIVO' && swdisReemvio) {
+
           console.log('ENVIANDO NOTIFICACION PARA WEB')
           envioNotificacion(
             modeloNoti.endPointWeb,
@@ -318,6 +323,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
             'notificacion'
           )
         } else if (modeloNoti.imei !== '' && modeloNoti.descripcionEstado === 'ACTIVO' && !mensajeNotificacionPulsar.envio_socket) {
+          console.log("Entra al reenviio", " ===>  "+ swdisReemvio);
           console.log('ENVIANDO NOTIFICACION PARA MOVIL_ IMEI=> ', modeloNoti.imei, ' Nombre del dispositivos==> ', modeloNoti.nombreDispositivo)
           const strNitImei = mensajeNotificacionPulsar.nit + '-' + modeloNoti.imei
           const envioPhoneMensajeria = {
@@ -430,6 +436,7 @@ async function notificacionEnvioPush(ObjetoNotificaionPush) {
 // FUNCION PARA ENVIAR AVISOS PUSH
 
 async function mensajeriaEnvioAvisos(objAvisosEnvio) {
+  console.log("Reenvio de avisos ", " SwEnvio " + swdisReenvioAvisos);
   let envioPhoneMensajeria = { idNotificacion: '', tipo: '', cabezera: '', cuerpo: '', archivoAdjuntoActuadoId: '', estadoNotificacionElectronicoId: '', archivoPdf: '', actoAdministrativo:''}
   try {
     mensaje_pulsar_avisos = objAvisosEnvio
@@ -468,9 +475,8 @@ async function mensajeriaEnvioAvisos(objAvisosEnvio) {
 
           console.log(' Elemento AVISO  modeloNoti.webId => ' + modeloNoti.webId + '  modeloNoti.descripcionEstado ' + modeloNoti.descripcionEstado)
 
-          console.log('============== Estado Socket =============== ' + mensaje_pulsar_avisos.envio_socket)
-
-          if (modeloNoti.webId != null && modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
+          console.log('============== Estado Socket =============== ' + mensaje_pulsar_avisos.envio_socket)          
+          if (modeloNoti.webId != null && modeloNoti.descripcionEstado == 'ACTIVO' && swdisReenvioAvisos) {
             console.log('ENVIANDO NOTIFICACION PARA WEB')
             envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensaje_pulsar_avisos.cabecera, mensaje_pulsar_avisos.cuerpo, 'Ir a ver el Aviso', objAvisos, 'avisos')
           } else if (modeloNoti.imei !== '' && modeloNoti.descripcionEstado == 'ACTIVO' && !mensaje_pulsar_avisos.envio_socket) {
@@ -595,13 +601,9 @@ async function mensajeriaEnvioPush(objMensajeria) {
     console.log(' mensajeria push arrDispositivos => ' + JSON.stringify(arrDispositivos))
     if (arrDispositivos.length > 0) {
       arrDispositivos.forEach(element => {
-        modeloNoti = element
-        if (modeloNoti.webId != null) {
-          if (modeloNoti.descripcionEstado == 'ACTIVO') {
-            if (!mensajeNotificacionPulsar.envio_socket) {
-              envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, 'Ir a mensajeria')
-            }
-          }
+        modeloNoti = element              
+        if (modeloNoti.webId != null && modeloNoti.descripcionEstado == 'ACTIVO' && swdisReemvioMensajeria) {
+          envioNotificacion(modeloNoti.endPointWeb, modeloNoti.keyWeb, modeloNoti.authWeb, mensajeriaPulsar.cabecera, mensajeriaPulsar.cuerpo, 'Ir a mensajeria')
         } else {
           if (modeloNoti.imei != '') {
             if (modeloNoti.descripcionEstado == 'ACTIVO') {
@@ -736,7 +738,8 @@ app.use(express.urlencoded({ extended: false }))
 app.post('/envio/mensajeria', async (req, res) => {
   try {
     console.log('Datos de mensajeria')
-    console.log(req.body)
+    console.log(req.body)    
+    swdisReemvioMensajeria = true;
     mensajeriaEnvioPush(req.body)
     res.status(200).json({
       transaccion: true,
@@ -764,6 +767,7 @@ app.post('/envio/notificacion', async (req, res) => {
   try {
     console.log('Datos de Notificacion Datos nuevos')
     console.log(req.body)
+    swdisReemvio = true;
     await notificacionEnvioPush(req.body)
     res.status(200).json({
       transaccion: true,
@@ -791,6 +795,7 @@ app.post('/envio/avisos', async (req, res) => {
   try {
     console.log('Datos de avisos')
     console.log(req.body)
+    swdisReenvioAvisos = true;
     mensajeriaEnvioAvisos(req.body)
     res.status(200).json({
       transaccion: true,
