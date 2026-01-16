@@ -1,22 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html> 
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Servidor con Express y socket.io!</title>
+  <meta charset="utf-8" />
+  <title>Servidor de Notificaciones — Dispositivos conectados</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --ok:#22c55e; --fg:#e5e7eb; --accent:#3b82f6; }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    header{padding:20px 24px;border-bottom:1px solid #1f2937;background:#0b1222;position:sticky;top:0}
+    h1{margin:0;font-size:20px;display:flex;gap:8px;align-items:center}
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--ok);box-shadow:0 0 12px #22c55e}
+    main{padding:24px;display:grid;gap:24px;grid-template-columns:1.2fr .8fr}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:16px}
+    h2{margin:0 0 12px 0;font-size:16px;color:#d1d5db}
+    .badge{display:inline-flex;gap:8px;align-items:center;background:#0b1222;border:1px solid #1f2937;border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border-bottom:1px solid #1f2937;padding:10px 8px;text-align:left;vertical-align:top}
+    th{color:var(--muted);font-weight:600}
+    tbody tr:hover{background:#0b1222}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#cbd5e1}
+    .muted{color:var(--muted);font-size:12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    input,textarea,button{font:inherit}
+    input,textarea{width:100%;background:#0b1222;border:1px solid #1f2937;border-radius:10px;padding:10px;color:var(--fg)}
+    textarea{min-height:90px;resize:vertical}
+    button{background:var(--accent);color:white;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .footer{color:var(--muted);font-size:12px;text-align:center}
+    .type { display:flex; align-items:center; gap:8px; }
+    .icon { width:18px; height:18px; display:inline-block; vertical-align:middle; }
+    @media (max-width: 920px){ main{grid-template-columns:1fr} }
+  </style>
 </head>
 <body>
-    <h1 style="background-color: yellow; text-align: center;"> Ejemplo de notificacion </h1>
+  <header>
+    <h1><span class="dot"></span> Servidor de Notificaciones</h1>
+    <div class="muted">Panel en tiempo real con Socket.IO</div>
+  </header>
 
-    <section style="width: 100%; text-align: center;">
-        <button id="consultDatosServer">consultar datos notificacion</button>
+  <main>
+    <section class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2>Dispositivos conectados</h2>
+        <div class="badge"><strong id="count">0</strong> conectados</div>
+      </div>
+      <div class="muted" style="margin-bottom:12px">Actualiza en vivo cuando un cliente se conecta o desconecta.</div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>ID</th>
+              <th>IP</th>
+              <th>User-Agent</th>
+              <th>Conectado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
     </section>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <!-- En esa direccion del script se encuentra importado el sockect.io-->
-    <div id="app"></div>
-    <script src="/js/index.js"></script> 
-    
+    <section class="card">
+      <h2>Enviar notificación</h2>
+      <div class="row">
+        <input id="title" placeholder="Título (ej. Aviso del servidor)" />
+        <textarea id="body" placeholder="Mensaje para todos los clientes"></textarea>
+        <button id="sendBtn">Enviar a todos</button>
+      </div>
+      <div class="muted" style="margin-top:10px">
+        Envía un evento Socket.IO (<span class="mono">notify:message</span>) que pueden escuchar tus clientes web/móvil.
+      </div>
+      <div class="footer" style="margin-top:14px">
+        Estado de conexión: <span id="status" class="mono">desconectado</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cliente de Socket.IO servido por tu backend en /socket.io/socket.io.js -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const tbody = document.getElementById('tbody');
+    const countEl = document.getElementById('count');
+    const statusEl = document.getElementById('status');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const socket = io();
+
+    // --- Detección por User-Agent ---
+    function detectType(uaRaw = '') {
+      const ua = uaRaw.toLowerCase();
+      const isTablet = /(ipad|tablet|sm-t|tab|android(?!.*mobile))/i.test(uaRaw);
+      const isMobile = !isTablet && /(android|iphone|ipod|mobile)/i.test(uaRaw);
+      if (isTablet) return 'tablet';
+      if (isMobile) return 'mobile';
+      return 'desktop';
+    }
+
+    // --- Íconos SVG inline (sin archivos externos) ---
+    function iconSVG(type) {
+      if (type === 'mobile') {
+        return `
+        <svg class="icon" viewBox="0 0 24 24" fill="none">
+          <rect x="7" y="2" width="10" height="20" rx="2" stroke="#e5e7eb" stroke-width="1.5"/>
+          <circle cx="12" cy="18" r="1" fill="#e5e7eb"/>
+        </svg>`;
+      }
+      if (type === 'tablet') {
+        return `
+        <svg class="icon" viewBox="0 0 24 24" fill="none">
+          <rect x="4" y="3" width="16" height="18" rx="2" stroke="#e5e7eb" stroke-width="1.5"/>
+          <circle cx="12" cy="18" r="1" fill="#e5e7eb"/>
+        </svg>`;
+      }
+      // desktop
+      return `
+      <svg class="icon" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="12" rx="2" stroke="#e5e7eb" stroke-width="1.5"/>
+        <rect x="8" y="18" width="8" height="2" rx="1" fill="#e5e7eb"/>
+      </svg>`;
+    }
+
+    function label(type) {
+      if (type === 'mobile') return 'Móvil';
+      if (type === 'tablet') return 'Tablet';
+      return 'PC';
+    }
+
+    function render(devices){
+      countEl.textContent = devices.length;
+      tbody.innerHTML = devices.map(d => {
+        const t = detectType(d.ua || '');
+        return `
+        <tr>
+          <td class="type">${iconSVG(t)}<span>${label(t)}</span></td>
+          <td class="mono">${d.id}</td>
+          <td class="mono">${d.ip ?? '-'}</td>
+          <td class="mono">${(d.ua ?? '').replaceAll('<','&lt;')}</td>
+          <td class="mono">${new Date(d.connectedAt).toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Eventos de vida de conexión
+    socket.on('connect', () => statusEl.textContent = 'conectado');
+    socket.on('disconnect', () => statusEl.textContent = 'desconectado');
+
+    // Lista completa (en cada cambio)
+    socket.on('device:list', render);
+
+    // Enviar notificación a todos
+    sendBtn.addEventListener('click', () => {
+      const title = document.getElementById('title').value.trim();
+      const body  = document.getElementById('body').value.trim();
+      if(!title || !body){ alert('Completa título y mensaje'); return; }
+      socket.emit('notify:all', { title, body });
+      document.getElementById('body').value = '';
+    });
+
+    // (Opcional) Ver lo que reciben los clientes
+    socket.on('notify:message', (msg) => {
+      console.log('Mensaje entrante:', msg);
+    });
+  </script>
 </body>
 </html>
